@@ -54,7 +54,20 @@ const CourseAssignmentWizard = ({ onBack }) => {
         return matchesSearch && matchesYear && matchesSemester;
     });
 
+    // Add helper function to check if student has the course
+    const hasCourseAllocated = (student) => {
+        if (!selectedCourse) return false;
+        return student.courses?.some(course => 
+            course.courseId === selectedCourse._id
+        );
+    };
+
     const handleStudentSelect = (student) => {
+        // Don't allow selection if student already has the course
+        if (hasCourseAllocated(student)) {
+            toast.error("This student is already enrolled in the selected course");
+            return;
+        }
         setSelectedStudents(prev => {
             if (prev.some(s => s.prn === student.prn)) {
                 return prev.filter(s => s.prn !== student.prn);
@@ -143,14 +156,6 @@ const CourseAssignmentWizard = ({ onBack }) => {
             return;
         }
 
-        if (currentStep === 2 && !selectedYear && !selectedSemester) {
-            setAllocationError({
-                type: "validation",
-                message: "Please select at least one filter (Year or Semester) to proceed"
-            });
-            return;
-        }
-
         if (currentStep === 3 && selectedStudents.length === 0) {
             setAllocationError({
                 type: "validation",
@@ -173,7 +178,7 @@ const CourseAssignmentWizard = ({ onBack }) => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 flex flex-col items-center justify-center">
+        <div className="max-w-5xl mx-auto p-6 flex flex-col items-center justify-center">
             {/* Back Button */}
             <div className="mb-6">
                 <button
@@ -352,33 +357,45 @@ const CourseAssignmentWizard = ({ onBack }) => {
                                             <th className="p-2">Email</th>
                                             <th className="p-2">Year</th>
                                             <th className="p-2">Semester</th>
+                                            <th className="p-2">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredStudents.map((student) => (
-                                            <tr
-                                                key={student.prn}
-                                                className={`hover:bg-richblack-700 ${
-                                                    selectedStudents.some(s => s.prn === student.prn)
-                                                        ? "bg-richblack-600"
-                                                        : ""
-                                                }`}
-                                            >
-                                                <td className="p-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedStudents.some(s => s.prn === student.prn)}
-                                                        onChange={() => handleStudentSelect(student)}
-                                                    />
-                                                </td>
-                                                <td className="p-2">{student.prn}</td>
-                                                <td className="p-2">{student.rollNumber}</td>
-                                                <td className="p-2">{`${student.firstName} ${student.lastName}`}</td>
-                                                <td className="p-2">{student.email}</td>
-                                                <td className="p-2">{student.year}</td>
-                                                <td className="p-2">{student.semester}</td>
-                                            </tr>
-                                        ))}
+                                        {filteredStudents.map((student) => {
+                                            const isAllocated = hasCourseAllocated(student);
+                                            return (
+                                                <tr
+                                                    key={student.prn}
+                                                    className={`hover:bg-richblack-700 ${
+                                                        selectedStudents.some(s => s.prn === student.prn)
+                                                            ? "bg-richblack-600"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    <td className="p-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedStudents.some(s => s.prn === student.prn)}
+                                                            onChange={() => handleStudentSelect(student)}
+                                                            disabled={isAllocated}
+                                                        />
+                                                    </td>
+                                                    <td className="p-2">{student.prn}</td>
+                                                    <td className="p-2">{student.rollNumber}</td>
+                                                    <td className="p-2">{`${student.firstName} ${student.lastName}`}</td>
+                                                    <td className="p-2">{student.email}</td>
+                                                    <td className="p-2">{student.year}</td>
+                                                    <td className="p-2">{student.semester}</td>
+                                                    <td className="p-2">
+                                                        {isAllocated ? (
+                                                            <span className="px-2 py-1 rounded-full text-xs bg-yellow-50/20 text-yellow-50">
+                                                                Already Allocated
+                                                            </span>
+                                                        ) : null}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
                                 </table>
                             </div>
@@ -536,7 +553,6 @@ const CourseAssignmentWizard = ({ onBack }) => {
                 <button
                     className={`px-6 py-2 rounded-lg flex items-center ${
                         (currentStep === 1 && !selectedCourse) ||
-                        (currentStep === 2 && !selectedYear && !selectedSemester) ||
                         (currentStep === 3 && selectedStudents.length === 0)
                             ? "bg-richblack-700 text-richblack-300 cursor-not-allowed"
                             : "bg-yellow-50 text-richblack-900 hover:bg-yellow-100"
@@ -544,7 +560,6 @@ const CourseAssignmentWizard = ({ onBack }) => {
                     onClick={currentStep === 4 ? handleAllocateCourse : handleNext}
                     disabled={
                         (currentStep === 1 && !selectedCourse) ||
-                        (currentStep === 2 && !selectedYear && !selectedSemester) ||
                         (currentStep === 3 && selectedStudents.length === 0)
                     }
                 >
