@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAllHODs, deleteHOD } from '../../../../../services/operations/instituteAdminAPI';
+import { getAllHODs, deleteHOD } from '../../../../../services/operations/instituteAdminAPI.js';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { FaEdit, FaTrash } from 'react-icons/fa';

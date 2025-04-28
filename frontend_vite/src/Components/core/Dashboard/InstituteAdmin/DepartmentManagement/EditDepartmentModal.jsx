@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { updateDepartment } from "../../../../../services/operations/instituteAdminAPI";
+import { updateDepartment } from "../../../../../services/operations/instituteAdminAPI.js";
 import { toast } from "react-hot-toast";
 
 const EditDepartmentModal = ({ isOpen, onClose, department, onUpdate }) => {

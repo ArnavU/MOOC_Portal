@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { createDepartment } from '../../../../../services/operations/instituteAdminAPI';
+import { createDepartment } from '../../../../../services/operations/instituteAdminAPI.js';
 import { toast } from 'react-hot-toast';
 
 const CreateDepartment = ({ onSuccess }) => {
