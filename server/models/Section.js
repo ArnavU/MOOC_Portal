@@ -12,6 +12,11 @@ const sectionSchema = new mongoose.Schema({
 			ref: "SubSection",
 		},
 	],
+	attachments: [
+		{
+			type: String
+		}
+	]
 });
 
 // Export the Section model

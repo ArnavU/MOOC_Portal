@@ -112,6 +112,7 @@ exports.createInstitute = async (req, res) => {
             contactNumber, 
             instituteEmail,
             website,
+            password,
         } = req.body;
 
         // Get the institute logo from request files
@@ -126,7 +127,8 @@ exports.createInstitute = async (req, res) => {
             !instituteAddress ||
             !contactNumber ||
             !instituteEmail ||
-            !instituteLogo
+            !instituteLogo || 
+            !password
         ) {
             return res.status(400).json({
                 success: false,
@@ -186,7 +188,7 @@ exports.createInstitute = async (req, res) => {
             email: adminEmail,
             accountType: "institute_admin",
             institute: institute._id,
-            password: await bcryptjs.hash(adminEmail, 10),
+            password: await bcryptjs.hash(password, 10),
             image: `https://api.dicebear.com/5.x/initials/svg?seed=${adminFirstName} ${adminLastName}`,
             additionalDetails: profile._id,
         });

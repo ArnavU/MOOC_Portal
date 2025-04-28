@@ -15,14 +15,13 @@ const courseProgress = new mongoose.Schema({
 			ref: "SubSection",
 		},
 	],
-	totalVideos: {
+	watchedLectures: {
 		type: Number,
 		default: 0,
 	},
-	completedPercentage: {
-		type: Number,
-		default: 0,
-	},
+	lastAccessed: {
+		type: Date
+	}
 });
 
 module.exports = mongoose.model("CourseProgress", courseProgress);

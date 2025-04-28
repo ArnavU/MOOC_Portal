@@ -6,10 +6,12 @@ import { VscTriangleDown } from 'react-icons/vsc';
 import { useState } from 'react';
 import ConfirmationModal from ".././../../.././common/ConfirmationModal"
 import SubSectionModal from './SubsectionModal';
-import { deleteSection, deleteSubSection } from '../../../../../services/operations/courseDetailsAPI';
+import { deleteSection, deleteSubSection, uploadAttachment, deleteAttachment } from '../../../../../services/operations/courseDetailsAPI';
 import { setCourse } from '../../../../../slices/courseSlice';
 import {RxDropdownMenu} from 'react-icons/rx'
 import { IoVideocam } from "react-icons/io5";
+import SectionAttachments from './SectionAttachments';
+
 const NestedView = ({handelChangeEditSectionName}) => {
     const {token} = useSelector(state => state.auth);
     const {course} = useSelector(state => state.course);
@@ -21,10 +23,7 @@ const NestedView = ({handelChangeEditSectionName}) => {
     
 
     const [confirmationModal, setConfirmationModal] = useState(null);
-
-
-
-
+    const [uploadingSectionId, setUploadingSectionId] = useState(null);
 
     const handeldeleteSection = async (sectionId) => {
         const result = await deleteSection({sectionId,courseId:course._id},token);
@@ -44,6 +43,23 @@ const NestedView = ({handelChangeEditSectionName}) => {
 
     const handelChangeEditSubSectionName = (subSectionId,subSection) => {
     }
+
+    const handleUploadAttachment = async (sectionId, file) => {
+        setUploadingSectionId(sectionId);
+        const result = await uploadAttachment(sectionId, course._id, file);
+        if (result) {
+            dispatch(setCourse(result));
+        }
+        setUploadingSectionId(null);
+    };
+
+    const handleDeleteAttachment = async (sectionId, url) => {
+        const result = await deleteAttachment(sectionId, course._id, url);
+        if (result) {
+            dispatch(setCourse(result));
+        }
+    };
+
     // console.log(course.courseContent);
   return (
     <div>
@@ -115,6 +131,15 @@ const NestedView = ({handelChangeEditSectionName}) => {
                                 <VscAdd className='text-lg text-yellow-50 ' />
                                 <p>Add Lecture</p>
                             </button>
+                            {/* Section Attachments Component */}
+                            <SectionAttachments
+                                attachments={section.attachments}
+                                sectionId={section._id}
+                                courseId={course._id}
+                                onUpload={handleUploadAttachment}
+                                onDelete={handleDeleteAttachment}
+                                uploading={uploadingSectionId === section._id}
+                            />
                         </div>
                  
                  </details>

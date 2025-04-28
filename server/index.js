@@ -13,6 +13,8 @@ const hodRoutes = require("./routes/HOD");
 const instructorRoutes = require("./routes/Instructor");
 const database = require("./config/database");
 const cookieParser = require("cookie-parser");
+const studentRoutes = require("./routes/Student");
+const {createServiceProvider} = require('./controllers/developer')
 
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
@@ -63,6 +65,18 @@ app.use("/api/v1/contact", require("./routes/ContactUs"));
 app.use("/api/v1/hod", hodRoutes);
 
 app.use("/api/v1/instructor", instructorRoutes);
+
+app.use("/api/v1/student", studentRoutes);
+
+
+// creating service provider
+
+createServiceProvider(
+  process.env.SERVICE_PROVIDER_FIRST_NAME,
+  process.env.SERVICE_PROVIDER_LAST_NAME,
+  process.env.SERVICE_PROVIDER_EMAIL,
+  process.env.SERVICE_PROVIDER_PASSWORD
+)
 
 app.get("/", (req, res) => {
   res.status(200).json({

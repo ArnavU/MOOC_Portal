@@ -3,7 +3,7 @@ const Course = require("../models/Course");
 const AllocatedCourse = require("../models/AllocatedCourse");
 const CourseProgress = require("../models/CourseProgress");
 
-
+// used by instructor
 // Get list of students in instructor's department
 exports.getDepartmentStudents = async (req, res) => {
     try {
@@ -42,7 +42,7 @@ exports.getDepartmentStudents = async (req, res) => {
         })
         .populate({
             path: 'course',
-            select: 'courseName courseCode courseDescription status approved thumbnail'
+            select: 'courseName courseCode courseDescription status approved thumbnail totalVideos'
         })
         .populate({
             path: 'student',
@@ -50,7 +50,7 @@ exports.getDepartmentStudents = async (req, res) => {
         })
         .populate({
             path: 'completedLectures',
-            select: 'completedVideos totalVideos completedPercentage'
+            select: 'completedVideos watchedLectures'
         })
         .populate({
             path: 'ratingAndReview',
@@ -81,10 +81,9 @@ exports.getDepartmentStudents = async (req, res) => {
                     enrollmentDate: allocation.enrollmentDate,
                     validityEndDate: allocation.validityEndDate,
                     progress: {
-                        percentage: allocation.completedLectures?.completedPercentage || 0,
+                        percentage: (allocation.completedLectures?.completedVideos?.length / allocation.course.totalVideos) * 100 || 0,
                         completedVideos: allocation.completedLectures?.completedVideos?.length || 0,
-                        totalVideos: allocation.completedLectures?.totalVideos || 0,
-                        detailedPercentage: allocation.completedLectures?.completedPercentage || 0
+                        totalVideos: allocation.course.totalVideos || 0,
                     },
                     rating: allocation.ratingAndReview ? {
                         rating: allocation.ratingAndReview.rating,
@@ -140,7 +139,124 @@ exports.getDepartmentStudents = async (req, res) => {
     }
 };
 
+// Get all allocated courses with student details in same department
+exports.getCourseAllocations = async (req, res) => {
+    try {
+        const instructorId = req.user.id;
+        const instructor = await User.findById(instructorId);
+        const department = instructor.department;
+
+        // Find all course allocations for the instructor
+        const allocatedCourses = await AllocatedCourse.find({ instructor: instructorId, department: department })
+            .populate({
+                path: 'course',
+                select: 'courseName courseCode courseDescription thumbnail status approved category department createdAt totalVideos',
+                populate: {
+                    path: 'category',
+                    select: 'name'
+                }
+            })
+            .populate({
+                path: 'department',
+            })
+            .populate({
+                path: 'student',
+                select: 'firstName lastName email additionalDetails department',
+                populate: {
+                    path: 'additionalDetails department',
+                    select: 'prn rollNumber department year semester name'
+                },
+            })
+            .populate({
+                path: 'completedLectures',
+                select: 'completedVideos totalVideos completedPercentage'
+            })
+            .populate({
+                path: 'ratingAndReview',
+                select: 'rating review'
+            })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        if (!allocatedCourses || allocatedCourses.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No allocated courses found for this instructor"
+            });
+        }
+
+        // Group allocations by course
+        const coursesMap = new Map();
+
+        allocatedCourses.forEach(allocation => {
+            if (!coursesMap.has(allocation.course._id)) {
+                coursesMap.set(allocation.course._id, {
+                    courseId: allocation.course._id,
+                    courseName: allocation.course.courseName,
+                    courseCode: allocation.course.courseCode,
+                    courseDescription: allocation.course.courseDescription,
+                    thumbnail: allocation.course.thumbnail,
+                    status: allocation.course.status,
+                    approved: allocation.course.approved,
+                    category: allocation.course.category,
+                    department: allocation.department,
+                    createdAt: allocation.course.createdAt,
+                    students: []
+                });
+            }
+
+            const studentData = {
+                studentId: allocation.student._id,
+                firstName: allocation.student.firstName,
+                lastName: allocation.student.lastName,
+                email: allocation.student.email,
+                prn: allocation.student.additionalDetails?.prn || "Not Available",
+                rollNumber: allocation.student.additionalDetails?.rollNumber || "Not Available",
+                department: allocation.student.department.name || "Not Available",
+                year: allocation.student.additionalDetails?.year || "Not Available",
+                semester: allocation.student.additionalDetails?.semester || "Not Available",
+                enrollmentStatus: allocation.isEnrolled ? "Enrolled" : "Not Enrolled",
+                enrollmentDate: allocation.enrollmentDate,
+                validityEndDate: allocation.validityEndDate,
+                status: allocation.status,
+                progress: allocation.completedLectures ? {
+                    completedVideos: allocation.completedLectures.completedVideos?.length || 0,
+                    totalVideos: allocation.course.totalVideos || 0,
+                    percentage: (allocation.completedLectures.completedVideos?.length / allocation.course.totalVideos) * 100 || 0
+                } : null,
+                rating: allocation.ratingAndReview ? {
+                    rating: allocation.ratingAndReview.rating,
+                    review: allocation.ratingAndReview.review
+                } : null,
+                lastAccessed: allocation.lastAccessed
+            };
+
+            coursesMap.get(allocation.course._id).students.push(studentData);
+        });
+
+        // Convert map to array and add total enrolled count
+        const formattedCourses = Array.from(coursesMap.values()).map(course => ({
+            ...course,
+            totalEnrolled: course.students.length
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Successfully fetched allocated courses",
+            data: formattedCourses
+        });
+
+    } catch (error) {
+        console.error("Error in getAllocatedCourses:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch allocated courses",
+            error: error.message
+        });
+    }
+};
   
+
 exports.allocateCourseToStudents = async (req, res) => {
     try {
         const { studentIds, courseId } = req.body;
@@ -293,122 +409,3 @@ exports.allocateCourseToStudents = async (req, res) => {
         });
     }
 };
-
-// Get all allocated courses with student details in same department
-exports.getCourseAllocations = async (req, res) => {
-    try {
-        const instructorId = req.user.id;
-        const instructor = await User.findById(instructorId);
-        const department = instructor.department;
-
-        // Find all course allocations for the instructor
-        const allocatedCourses = await AllocatedCourse.find({ instructor: instructorId, department: department })
-            .populate({
-                path: 'course',
-                select: 'courseName courseCode courseDescription thumbnail status approved category department createdAt',
-                populate: {
-                    path: 'category',
-                    select: 'name'
-                }
-            })
-            .populate({
-                path: 'department',
-            })
-            .populate({
-                path: 'student',
-                select: 'firstName lastName email additionalDetails department',
-                populate: {
-                    path: 'additionalDetails department',
-                    select: 'prn rollNumber department year semester name'
-                },
-            })
-            .populate({
-                path: 'completedLectures',
-                select: 'completedVideos totalVideos completedPercentage'
-            })
-            .populate({
-                path: 'ratingAndReview',
-                select: 'rating review'
-            })
-            .sort({ createdAt: -1 })
-            .lean();
-
-        if (!allocatedCourses || allocatedCourses.length === 0) {
-            return res.status(404).json({
-                success: false,
-                message: "No allocated courses found for this instructor"
-            });
-        }
-
-        // Group allocations by course
-        const coursesMap = new Map();
-
-        allocatedCourses.forEach(allocation => {
-            if (!coursesMap.has(allocation.course._id)) {
-                coursesMap.set(allocation.course._id, {
-                    courseId: allocation.course._id,
-                    courseName: allocation.course.courseName,
-                    courseCode: allocation.course.courseCode,
-                    courseDescription: allocation.course.courseDescription,
-                    thumbnail: allocation.course.thumbnail,
-                    status: allocation.course.status,
-                    approved: allocation.course.approved,
-                    category: allocation.course.category,
-                    department: allocation.department,
-                    createdAt: allocation.course.createdAt,
-                    students: []
-                });
-            }
-
-            const studentData = {
-                studentId: allocation.student._id,
-                firstName: allocation.student.firstName,
-                lastName: allocation.student.lastName,
-                email: allocation.student.email,
-                prn: allocation.student.additionalDetails?.prn || "Not Available",
-                rollNumber: allocation.student.additionalDetails?.rollNumber || "Not Available",
-                department: allocation.student.department.name || "Not Available",
-                year: allocation.student.additionalDetails?.year || "Not Available",
-                semester: allocation.student.additionalDetails?.semester || "Not Available",
-                enrollmentStatus: allocation.isEnrolled ? "Enrolled" : "Not Enrolled",
-                enrollmentDate: allocation.enrollmentDate,
-                validityEndDate: allocation.validityEndDate,
-                status: allocation.status,
-                progress: allocation.completedLectures ? {
-                    completedVideos: allocation.completedLectures.completedVideos?.length || 0,
-                    totalVideos: allocation.completedLectures.totalVideos || 0,
-                    percentage: allocation.progress || 0
-                } : null,
-                rating: allocation.ratingAndReview ? {
-                    rating: allocation.ratingAndReview.rating,
-                    review: allocation.ratingAndReview.review
-                } : null,
-                lastAccessed: allocation.lastAccessed
-            };
-
-            coursesMap.get(allocation.course._id).students.push(studentData);
-        });
-
-        // Convert map to array and add total enrolled count
-        const formattedCourses = Array.from(coursesMap.values()).map(course => ({
-            ...course,
-            totalEnrolled: course.students.length
-        }));
-
-        return res.status(200).json({
-            success: true,
-            message: "Successfully fetched allocated courses",
-            data: formattedCourses
-        });
-
-    } catch (error) {
-        console.error("Error in getAllocatedCourses:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch allocated courses",
-            error: error.message
-        });
-    }
-};
-  
-  

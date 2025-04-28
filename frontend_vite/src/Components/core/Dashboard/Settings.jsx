@@ -6,6 +6,8 @@ import {AiOutlineEyeInvisible} from 'react-icons/ai'
 import {AiOutlineEye} from 'react-icons/ai'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { setUser } from '../../../slices/profileSlice'
+import { ACCOUNT_TYPE } from '../../../utils/constants'
 
 
 
@@ -18,14 +20,14 @@ const Settings = () => {
 
   //update profile picture
   const pfp=useSelector(state=>state.profile.user.image);
-  const [profilePicture, setprofilePicture] = useState(pfp)
+  const [profilePicture, setprofilePicture] = useState(null)
   const token= useSelector(state=>state.auth.token);
 
 
   const handleUpload = (e) => {
     e.preventDefault();
     const file = e.target[0].files[0];
-    updatePfp(token,file);
+    updatePfp(file, dispatch, setUser);
   }
 
   const handleFileChange = (e) => {
@@ -45,6 +47,12 @@ const Settings = () => {
     gender: "",
     contactNumber: "",
     about: "",
+    designation: "",
+    prn: "",
+    rollNumber: "",
+    batch: "",
+    year: "",
+    semester: ""
   })
 
   const handleOnChange = (e) => {
@@ -56,7 +64,7 @@ const Settings = () => {
 
   const handelAdditionalDetails = (e) => {
     e.preventDefault()
-    updateAdditionalDetails(token,formData);
+    updateAdditionalDetails(formData, dispatch, setUser);
   }
 
 
@@ -115,14 +123,20 @@ const Settings = () => {
         {/* update profile picture */}
         <div className='flex items-center justify-between rounded-md border-[1px] border-richblack-700 bg-richblack-800 md:p-8 md:px-12 px-3 py-3 text-richblack-5'>
           <div className='flex items-center gap-x-4'>
-            <img className='aspect-square w-[78px] rounded-full object-cover'  src={profilePicture}></img>
+            <img className='aspect-square w-[78px] rounded-full object-cover'  src={profilePicture || pfp}></img>
             <div className='space-y-2'>
             <p>Change Profile Picture</p>
             <form onSubmit={handleUpload}>
             <div className='flex flex-row gap-3'>
               <label className="cursor-pointer rounded-md bg-richblack-700 py-2 px-5 font-semibold text-richblack-50'" htmlFor="upload">Select
             <input id='upload' type="file" onChange={handleFileChange} className="hidden" accept="image/png, image/gif, image/jpeg"/></label>
-             <button type='submit' className='flex items-center bg-yellow-50 cursor-pointer gap-x-2 rounded-md py-2 px-5 font-semibold text-richblack-900 undefined'>Upload</button>
+             <button type='submit' className={`flex items-center gap-x-2 rounded-md py-2 px-5 font-semibold text-richblack-900 undefined
+              ${profilePicture == null ? "bg-gray-500" : "bg-yellow-50 cursor-pointer"}
+             `}
+              disabled={profilePicture == null}
+             >
+              Upload
+             </button>
             </div>
             </form>
             </div>
@@ -170,6 +184,97 @@ const Settings = () => {
                               <input defaultValue={user?.additionalDetails.about || null} type="text" name="about" id="about" placeholder="Enter Bio Details" className="form-style" onChange={handleOnChange}/>
                 </div>
               </div>
+              {user?.additionalDetails?.designation &&
+                <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="designation" className="text-richblack-50">Designation</label>
+                    <input 
+                      defaultValue={user?.additionalDetails.designation || "Not Set"} 
+                      type="text" 
+                      name="designation" 
+                      id="designation" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                    />
+                </div>
+              }
+
+              {/* Academic Details Section */}
+              { user?.accountType == ACCOUNT_TYPE.STUDENT &&
+                <>
+                <h2 className="text-lg font-semibold text-richblack-5 mt-6">Academic Details</h2>
+                <div className="flex flex-col gap-5 lg:flex-row">
+                  <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="prn" className="text-richblack-50">PRN</label>
+                    <input 
+                      defaultValue={user?.additionalDetails.prn || "Not Set"} 
+                      type="text" 
+                      name="prn" 
+                      id="prn" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                      />
+                  </div>
+                  <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="rollNumber" className="text-richblack-50">Roll Number</label>
+                    <input 
+                      defaultValue={user?.additionalDetails.rollNumber || "Not Set"} 
+                      type="number" 
+                      name="rollNumber" 
+                      id="rollNumber" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                    />
+                  </div>
+                </div>  
+                <div className="flex flex-col gap-5 lg:flex-row">
+                  <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="batch" className="text-richblack-50">Batch</label>
+                    <input 
+                      defaultValue={user?.additionalDetails.batch || "Not Set"} 
+                      type="number" 
+                      name="batch" 
+                      id="batch" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="year" className="text-richblack-50">Year</label>
+                    <select 
+                      defaultValue={user?.additionalDetails.year || ""} 
+                      name="year" 
+                      id="year" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                    >
+                      <option value="">Not Set</option>
+                      <option value="FY">FY</option>
+                      <option value="SY">SY</option>
+                      <option value="TY">TY</option>
+                      <option value="BTech">BTech</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-5 lg:flex-row">
+                  <div className="flex flex-col gap-2 lg:w-[48%]">
+                    <label htmlFor="semester" className="text-richblack-50">Semester</label>
+                    <select 
+                      defaultValue={user?.additionalDetails.semester || ""} 
+                      name="semester" 
+                      id="semester" 
+                      className="form-style bg-richblack-700 cursor-not-allowed" 
+                      disabled
+                    >
+                      <option value="">Not Set</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </div>
+                </div>
+              </>
+            }
+
           </div>
           <div className="flex justify-end gap-2"><button className="flex items-center bg-yellow-50 cursor-pointer gap-x-2 rounded-md py-2 px-5 font-semibold text-richblack-900 undefined" type="submit">Save</button></div>
           </form>

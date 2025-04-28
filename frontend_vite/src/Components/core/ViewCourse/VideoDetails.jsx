@@ -126,7 +126,7 @@ const VideoDetails = () => {
               src={videoData.videoUrl}
               aspectRatio="16:9"
               fluid={true}
-              autoPlay={false}
+              autoPlay={true}
               onEnded={() => setVideoEnd(true)}
             >
               

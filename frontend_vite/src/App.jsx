@@ -19,7 +19,7 @@ import OpenRoute from "./Components/core/Auth/OpenRoute";
 import PrivateRoute from "./Components/core/Auth/PrivateRoute";
 import MyProfile from "./Components/core/Dashboard/MyProfile";
 import Setting from "./Components/core/Dashboard/Settings";
-import EnrollledCourses from "./Components/core/Dashboard/EnrolledCourses";
+import EnrolledCourses from "./Components/core/Dashboard/StudentDashboard/EnrolledCourses";
 import Cart from "./Components/core/Dashboard/Cart/index";
 import { ACCOUNT_TYPE } from "./utils/constants";
 import AddCourse from "./Components/core/Dashboard/AddCourse/index";
@@ -34,7 +34,6 @@ import VideoDetails from "./Components/core/ViewCourse/VideoDetails";
 import PurchaseHistory from "./Components/core/Dashboard/PurchaseHistory";
 import InstructorDashboard from "./Components/core/Dashboard/InstructorDashboard/InstructorDashboard";
 import { RiWifiOffLine } from "react-icons/ri";
-import AdminPannel from "./Components/core/Dashboard/AdminPannel";
 import MyInstitutes from "./Components/core/Dashboard/MyInstitutes/MyInstitutes";
 import CreateInstitute from "./Components/core/Dashboard/AddInstitute/CreateInstitute";
 import ManageCategories from "./Components/core/Dashboard/ManageCategories/ManageCategories";
@@ -48,7 +47,7 @@ import AssignedCourses from "./Components/core/Dashboard/AssignedCourses/CourseA
 import CourseApprovals from "./Components/core/Dashboard/HOD/CourseApprovals/CourseApprovals";
 import DepartmentCourses from "./Components/core/Dashboard/HOD/DepartmentCourses/DepartmentCourses";
 import DepartmentStudents from "./Components/core/Dashboard/DepartmentStudents/DepartmentStudents";
-
+import UnEnrolledCourses from "./Components/core/Dashboard/StudentDashboard/UnEnrolledCourses";
 function App() {
   // console.log = function () {};
   const user = useSelector((state) => state.profile.user);
@@ -64,7 +63,7 @@ function App() {
       />
       <NavBar setProgress={setProgress}></NavBar>
       {!navigator.onLine && (
-        <div className="bg-red-500 flex text-white text-center p-2 bg-richblack-300 justify-center gap-2 items-center">
+        <div className="flex text-white text-center p-2 bg-richblack-300 justify-center gap-2 items-center">
           <RiWifiOffLine size={22} />
           Please check your internet connection.
           <button
@@ -127,7 +126,11 @@ function App() {
               <Route path="dashboard/cart" element={<Cart />} />
               <Route
                 path="dashboard/enrolled-courses"
-                element={<EnrollledCourses />}
+                element={<EnrolledCourses />}
+              />
+              <Route
+                path="/dashboard/unenrolled-courses"
+                element={<UnEnrolledCourses />}
               />
               <Route
                 path="dashboard/purchase-history"
@@ -169,11 +172,6 @@ function App() {
                 path="dashboard/manage-categories"
                 element={<ManageCategories />}
               />
-            </>
-          )}
-          {user?.accountType === ACCOUNT_TYPE.ADMIN && (
-            <>
-              <Route path="dashboard/admin-panel" element={<AdminPannel />} />
             </>
           )}
           {user?.accountType === ACCOUNT_TYPE.INSTITUTE_ADMIN && (

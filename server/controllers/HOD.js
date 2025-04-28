@@ -1,3 +1,5 @@
+
+
 /**
  * Controller for handling Head of Department (HOD) operations.
  * This controller manages student registration and management operations for HODs.
@@ -697,12 +699,10 @@ exports.registerFaculty = async (req, res) => {
 
 // Get faculty list by department
 exports.getFacultyList = async (req, res) => {
-    console.log("Getting Faculty List");
     try {
         // Get HOD's department from request
         const hod = await User.findById(req.user.id);
-        const { department } = hod.department;
-
+        const department = hod.department;
         // Find all faculty members in the department
         const facultyList = await User.find({
             accountType: "Instructor",

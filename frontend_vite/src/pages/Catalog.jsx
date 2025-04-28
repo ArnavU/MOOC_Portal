@@ -19,7 +19,7 @@ const Catalog = () => {
   const dispatch = useDispatch();
 
 
-  const fetchSublinks=  async ()=>{
+  const fetchSublinks = async ()=>{
     try {
         const result = await apiConnector("GET",categories.CATEGORIES_API);
         const category_id= result.data.data.filter((item)=>item.name=== Catalog.catalog)[0]._id;
@@ -63,8 +63,8 @@ useEffect(() => {
       </div>
 
       <div className=' mx-auto box-content w-full max-w-maxContentTab px-2 py-12 lg:max-w-maxContent'>
-        <h2 className='Courses to get you started'>
-        Courses to get you started
+        <h2 className='text-richblack-100'>
+          Courses to get you started
         </h2>
         <div className='my-4 flex border-b border-b-richblack-600 text-sm'>
           <button onClick={()=>{setActiveOption(1)}}  className={activeOption===1? `px-4 py-2 border-b border-b-yellow-25 text-yellow-25 cursor-pointer`:`px-4 py-2 text-richblack-50 cursor-pointer` }>Most Populer</button>
@@ -80,7 +80,7 @@ useEffect(() => {
         <CourseSlider Courses={CatalogPageData?.differentCourses}/>
       </div>
       
-      <div className=' mx-auto box-content w-full max-w-maxContentTab px-2 py-12 lg:max-w-maxContent'>
+      {/* <div className=' mx-auto box-content w-full max-w-maxContentTab px-2 py-12 lg:max-w-maxContent'>
         <h2 className='section_heading mb-6 md:text-3xl text-xl'>
           Frequently BoughtTogether
           </h2>
@@ -91,7 +91,7 @@ useEffect(() => {
               ))
             }
           </div>
-      </div>
+      </div> */}
 
     </div>
   )

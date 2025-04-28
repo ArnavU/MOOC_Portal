@@ -129,3 +129,32 @@ exports.isHOD = (req, res, next) => {
         });
     }
 };
+
+/**
+ * Middleware to add user ID to request object if authenticated
+ * This middleware doesn't block requests, it just adds user info if available
+ */
+exports.addUserToRequest = async (req, res, next) => {
+  try {
+    // Get token from header
+    const token = req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
+    
+    if (!token) {
+      // No token present, set user to null and continue
+      req.user = { id: null };
+      return next();
+    }
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Add user ID to request object
+    req.user = { id: decoded.id };
+    
+    next();
+  } catch (error) {
+    // If token is invalid, just set user to null and continue
+    req.user = { id: null };
+    next();
+  }
+};

@@ -20,7 +20,7 @@ import RatingSlider from '../Components/core/Ratings/RatingSlider';
 
 function Home() {
     const [CatalogPageData, setCatalogPageData] = useState(null);
-    const categoryID = "6475dbeb49dcc886b5698441";
+    const categoryID = "67f8a984ead8b92914f752b4";
 
     useEffect(() => {
         const fetchCatalogPageData = async () => {
@@ -38,13 +38,13 @@ function Home() {
   return (
     <div>
         <div className=' mx-auto relative flex flex-col w-11/12 items-center justify-between text-white '>
-            <Link onClick={()=>{dispatch(setProgress(100))}}  to={"/signup"}>
+            {/* <Link onClick={()=>{dispatch(setProgress(100))}}  to={"/login"}>
             <div className=' group mt-16 p-1 mx-auto rounded-full bg-richblack-800 font-bold transition-all duration-200 hover: scale-95 w-fit max-w-maxContent'>
                 <div className='flex flex-row items-center gap-2 rounded-full px-10 py-[5px] transition-all duration-200 group-hover:bg-richblack-900'>
               <p>Become an Instructor</p><FaArrowRight/>
                 </div>
             </div>
-            </Link>
+            </Link> */}
 
             <div className='text-center text-3xl md:text-4xl font-semibold mt-7'>
                 Empower Your Future With <HighlightText text={"Coding Skills"}/>
@@ -54,7 +54,7 @@ function Home() {
             </div>
 
             <div className='flex flex-row gap-7 mt-8'>
-                <CTAButton active={true} linkto={"/signup"}>
+                <CTAButton active={true} linkto={"/login"}>
                     Learn More
                 </CTAButton>
                 <CTAButton active={false} linkto={"/login"} >Book a Demo</CTAButton>
@@ -110,12 +110,12 @@ function Home() {
         </h2>
         <CourseSlider Courses={CatalogPageData?.selectedCourses}/>
       </div>       
-        <div className=' mx-auto box-content w-full max-w-maxContentTab px- py-12 lg:max-w-maxContent'>
+        {/* <div className=' mx-auto box-content w-full max-w-maxContentTab px- py-12 lg:max-w-maxContent'>
         <h2 className='section_heading mb-6 md:text-3xl text-xl'>
            Students are learning
         </h2>
         <CourseSlider Courses={CatalogPageData?.differentCourses}/>
-      </div>       
+      </div>        */}
 
 
                 {/* Code Section 2 */}
@@ -134,7 +134,7 @@ function Home() {
                 ctabtn1={
                     {
                         btnText: "Continue Lesson",
-                        linkto: "/signup",
+                        linkto: "/login",
                         active: true,
                     }
                 }
@@ -173,7 +173,7 @@ function Home() {
                             </div>
                             
                         </CTAButton>
-                        <CTAButton active={false} linkto={"/signup"}>
+                        <CTAButton active={false} linkto={"/login"}>
                             <div>
                                 Learn more
                             </div>
@@ -197,7 +197,7 @@ function Home() {
                     <div className='text-[16px]'>
                     The modern StudyNotion is the dictates its own terms. Today, to be a competitive specialist requires more than professional skills.
                     </div>
-                    <CTAButton active={true} linkto={"/signup"}>
+                    <CTAButton active={true} linkto={"/login"}>
                         <div>
                             Learn more
                         </div>

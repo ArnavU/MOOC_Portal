@@ -29,9 +29,9 @@ const Course_Card = ({course, Height}) => {
                     <p className='text-xl text-richblack-5'>{course?.courseName}</p>
                     <p className='text-sm text-richblack-300'>{course?.courseDescription}</p>
                     <div className='flex items-center gap-2'>
-                        <span className='text-yellow-50'>{avgReviewCount || 0}</span>
-                        <RatingStars Review_Count={avgReviewCount} />
-                        <span className='text-richblack-400'>{course?.ratingAndReviews?.length} Ratings</span>
+                        <span className='text-yellow-50'>{course?.avgRating || 0}</span>
+                        <RatingStars Review_Count={course?.avgRating || 0} />
+                        <span className='text-richblack-400'>{course?.totalRatings} Rating{course?.totalRatngs > 0 ? "s" : ""}</span>
                     </div>
                 </div>
             </div>

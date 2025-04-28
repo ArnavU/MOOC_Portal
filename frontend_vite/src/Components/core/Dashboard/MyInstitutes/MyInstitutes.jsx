@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import EditInstituteModal from "./EditInstituteModal";
 
-const MyInstitutes = () => {
+const CreateInstitute = () => {
     const navigate = useNavigate();
     const [institutes, setInstitutes] = useState([]);
     const [selectedInstitute, setSelectedInstitute] = useState(null);
@@ -188,4 +188,4 @@ const MyInstitutes = () => {
     );
 };
 
-export default MyInstitutes;
+export default CreateInstitute;

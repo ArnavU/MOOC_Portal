@@ -8,6 +8,7 @@ import IconBtn from '../../common/IconBtn'
 import {FaChevronLeft} from 'react-icons/fa'
 import {MdOutlineKeyboardArrowDown} from 'react-icons/md'
 import {FaAngleDoubleRight} from 'react-icons/fa'
+import AttachmentListSidebar from './AttachmentListSidebar';
 
 const VideoDetailsSidebar = ({setReviewModal}) => {
   const [activeStatus, setActiveStatus] = useState("");
@@ -78,10 +79,10 @@ const VideoDetailsSidebar = ({setReviewModal}) => {
                 {
                   section?.subSection.map((subSection, index) => (
                     <div  key={subSection?._id} className='transition-[height] duration-500 ease-in-out'>
-                      <div onClick={()=>{
+                      <div onClick={() =>{
                         setShowSidebar(true);
                         navigate(`/dashboard/enrolled-courses/view-course/${courseId}/section/${section?._id}/sub-section/${subSection?._id}`);
-                      }} className={`${subSection?._id === videoActive? ("bg-yellow-200"):("bg-richblack-50") } cursor-pointer items-baseline  flex gap-3  px-5 py-2 font-semibold text-richblack-800 relative border-b-[1px] border-richblack-600 `}>
+                      }} className={`${subSection?._id === videoActive? ("bg-yellow-200"): ("bg-richblack-50") } cursor-pointer items-baseline  flex gap-3  px-5 py-2 font-semibold text-richblack-800 relative border-b-[1px] border-richblack-600 `}>
                       {/* <input type='checkbox' className=' '/> */}
                       <div className="checkbox-wrapper-19 absolute bottom-1">
                         <input readOnly={true} checked={
@@ -95,6 +96,8 @@ const VideoDetailsSidebar = ({setReviewModal}) => {
                     </div>
                   ))
                 }
+                {/* Attachments for this section */}
+                <AttachmentListSidebar attachments={section.attachments} />
                 </details>
             ))
           }

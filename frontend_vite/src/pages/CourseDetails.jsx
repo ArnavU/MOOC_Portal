@@ -10,9 +10,9 @@ import { toast } from 'react-hot-toast';
 import RatingStars from '../Components/common/RatingStars';
 import GetAvgRating from '../utils/avgRating';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { BsGlobe } from 'react-icons/bs';
+import { BsCrosshair, BsGlobe, BsMicrosoftTeams } from 'react-icons/bs';
 import { FaShareSquare } from 'react-icons/fa';
-import {IoVideocamOutline} from 'react-icons/io5';
+import {IoCloseOutline, IoVideocamOutline} from 'react-icons/io5';
 import { addToCart } from '../slices/cartSlice';
 import { ACCOUNT_TYPE } from '../utils/constants';
 import {FaChevronDown} from 'react-icons/fa';
@@ -26,13 +26,36 @@ const CourseDetails = () => {
     const {courseId} = useParams();
     const [courseDetail, setCourseDetail] = useState(null);
     const [avgReviewCount, setAvgReviewCount] = useState(0);
-    const [alreadyEnrolled, setAlreadyEnrolled] = useState(false);
     const {cart}=useSelector((state)=>state.cart);
+    const [showFirstVideo, setShowFirstVideo] = useState(false);
 
-    const handleAskToEnroll = () => {
+    const handleEnrollNow = () => {
         if(token) {
-            // Here you can implement the logic to send enrollment request
-            toast.success("Enrollment request sent successfully!");
+            navigate("/dashboard/assigned-courses");
+        } else {
+            navigate('/login');
+        }
+    }
+
+    const handleGoToCourse = () => {
+        if(token) {
+            // Get the first section and subsection IDs
+            const firstSection = courseDetail?.courseContent?.[0];
+            const firstSubSection = firstSection?.subSection?.[0];
+            
+            if (firstSection && firstSubSection) {
+                navigate(`/dashboard/enrolled-courses/view-course/${courseId}/section/${firstSection._id}/sub-section/${firstSubSection._id}`);
+            } else {
+                navigate("/dashboard/enrolled-courses");
+            }
+        } else {
+            navigate('/login');
+        }
+    }
+
+    const handleBuyNow = () => {
+        if(token) {
+            handelAddToCart();
         } else {
             navigate('/login');
         }
@@ -85,20 +108,37 @@ const CourseDetails = () => {
         }
     }
 
-
-    useEffect (() => {
-    if(courseDetail){
-        const Enrolled = courseDetail?.studentsEnrolled?.find((student) => student === user?._id);
-        // console.log("CourseDetails -> Enrolled", Enrolled)
-        if(Enrolled){
-            setAlreadyEnrolled(true);
+    // Render enrollment button based on status
+    const renderEnrollmentButton = () => {
+        if (!courseDetail) return null;
+        
+        const enrollmentStatus = courseDetail.enrollmentStatus;
+        
+        switch(enrollmentStatus) {
+            case "enrolled":
+                return (
+                    <>
+                        <p className="text-richblack-200 mb-2">You are enrolled in this course</p>
+                        <button onClick={handleGoToCourse} className='yellowButton'>Go to Course</button>
+                    </>
+                );
+            case "un-enrolled":
+                return (
+                    <>
+                        <p className="text-richblack-200 mb-2">You are allocated this course. Please enroll to access it.</p>
+                        <button onClick={handleEnrollNow} className='yellowButton'>Enroll Now</button>
+                    </>
+                );
+            case "not-assigned":
+            default:
+                return (
+                    <>
+                        <p className="text-richblack-200 mb-2">Purchase this course to get access</p>
+                        <button onClick={handleBuyNow} className='yellowButton'>Buy Now</button>
+                    </>
+                );
         }
     }
-    }, [courseDetail, user?._id])
-
-
-
-
 
     if(!courseDetail) return <div className='flex justify-center items-center h-screen'>
         <div className='custom-loader'></div>
@@ -116,11 +156,11 @@ const CourseDetails = () => {
                             <p className='text-4xl font-bold text-richblack-5 sm:text-[42px]'>{courseDetail?.courseName}</p>
                             <p className='text-richblack-200'>{courseDetail?.courseDescription}</p>
                             <div className='flex gap-x-3 items-center'>
-                        <span className='text-yellow-50'>{avgReviewCount || 0}</span>
-                        <RatingStars Review_Count={avgReviewCount} />
-                        <span className=' md:block hidden md:text-xl text-richblack-5'>({courseDetail?.ratingAndReviews?.length} Reviews)</span>
+                        <span className='text-yellow-50'>{courseDetail.avgRating || 0}</span>
+                        <RatingStars Review_Count={courseDetail.avgRating} />
+                        <span className=' md:block hidden md:text-xl text-richblack-5'>({courseDetail?.totalRatings} Review{courseDetail?.totalRatings>1 ? 's' : ''})</span>
                         {/* student enrolled */}
-                        <span className='text-richblack-200'>{courseDetail?.studentsEnrolled?.length} students enrolled</span>
+                        <span className='text-richblack-200'>{courseDetail?.studentsEnrolled} student{courseDetail?.studentsEnrolled > 1 ? 's' : ""} enrolled</span>
                     </div>
                     <div>
                         <p>Created By {courseDetail?.instructor?.firstName}  {courseDetail?.instructor?.lastName}</p>
@@ -140,11 +180,7 @@ const CourseDetails = () => {
                     <div className='flex w-full flex-col gap-4 border-y border-y-richblack-500 py-4 lg:hidden'>
                         {ACCOUNT_TYPE.INSTRUCTOR !==user?.accountType &&
                         <>
-                            {
-                                alreadyEnrolled ? 
-                                <button onClick={()=>{navigate("/dashboard/enrolled-courses")}} className='yellowButton'>Go to Course</button> : 
-                                <button onClick={handleAskToEnroll} className='yellowButton'>Ask to Enroll</button>
-                            }
+                            {renderEnrollmentButton()}
                             <button onClick={handleAddToWishlist} className='blackButton text-richblack-5'>Add to Wishlist</button>
                         </>
                         }
@@ -157,11 +193,7 @@ const CourseDetails = () => {
                             <div className='flex flex-col gap-4'>
                                 {ACCOUNT_TYPE.INSTRUCTOR !==user?.accountType &&
                                 <>
-                                    {
-                                        alreadyEnrolled ? 
-                                        <button onClick={()=>{navigate("/dashboard/enrolled-courses")}} className='yellowButton'>Go to Course</button> : 
-                                        <button onClick={handleAskToEnroll} className='yellowButton'>Ask to Enroll</button>
-                                    }
+                                    {renderEnrollmentButton()}
                                     <button onClick={handleAddToWishlist} className='blackButton text-richblack-5'>Add to Wishlist</button>
                                 </>
                                 }
@@ -170,10 +202,10 @@ const CourseDetails = () => {
                                 <p>30-Day Money-Back Guarantee</p>
                             </div>
                             <div className=''>
-                                <p className='my-2 text-xl font-semibold '>This course includes</p>
+                                <p className='my-2 text-xl font-semibold '>Pre-requisites</p>
                                 <div className='flex flex-col gap-1 text-sm text-caribbeangreen-100'>
                                     {
-                                        JSON.parse(courseDetail?.instructions).map((item,index) => (
+                                        courseDetail?.instructions?.map((item,index) => (
                                             <div key={index} className='flex gap-2 items-center'>
                                                 <span className='text-lg'>✓</span>
                                                 <span>{item}</span>
@@ -205,9 +237,16 @@ const CourseDetails = () => {
                             What you'll learn
                         </p>
                         <div className='mt-5'>
-                            {
-                                courseDetail?.whatYouWillLearn
-                            }
+                        {console.log("What you will learn: ", courseDetail?.whatYouWillLearn)}
+                            <ul className="list-disc pl-6">
+                                {(courseDetail?.whatYouWillLearn?.split("\n") || []).map((line, ind) =>
+                                    line.trim() && (
+                                        <li key={ind} className="mb-1">
+                                            {line}
+                                        </li>
+                                    )
+                                )}
+                            </ul>
                         </div>
                     </div>
                     <div className='max-w-[830px] '>
@@ -215,48 +254,71 @@ const CourseDetails = () => {
                             <p className='text-[28px] font-semibold'>Course Content</p>
                             <div className='flex flex-wrap justify-between gap-2'>
                                 <div className='flex gap-2'>
-                                <span>{courseDetail?.courseContent?.length} Section(s)</span>
-                                <span>{courseDetail?.courseContent?.reduce((acc, item) => acc + item?.subSection?.length, 0)} Lecture(s)</span>
+                                    <span>{courseDetail?.courseContent?.length || 0} Section(s)</span>
+                                    <span>
+                                        {courseDetail?.courseContent?.reduce((acc, item) => 
+                                            acc + (item?.subSection?.length || 0), 0
+                                        )} Lecture(s)
+                                    </span>
                                 </div>
-                                <button className='text-yellow-25'>
+                                {/* <button className='text-yellow-25'>
                                     <span>Collapse all sections</span>
-                                </button>
+                                </button> */}
                             </div>
                         </div>
                         <div className='py-4'>
-                            {
-                                courseDetail?.courseContent?.map((item, index) => (
-                                    <details key={index} className=' border border-solid border-richblack-600 bg-richblack-700 text-richblack-5 detailanimatation'>
-                                        <summary className='flex cursor-pointer items-start justify-between bg-opacity-20 px-7  py-5 transition-[0.3s]'>
-                                            <div className='flex items-center gap-2'>
-                                            <FaChevronDown className='arrow '/>
+                            {courseDetail?.courseContent?.map((item, index) => (
+                                <details 
+                                    key={index} 
+                                    className='border border-solid border-richblack-600 bg-richblack-700 text-richblack-5 detailanimatation'
+                                >
+                                    <summary className='flex cursor-pointer items-start justify-between bg-opacity-20 px-7 py-5 transition-[0.3s]'>
+                                        <div className='flex items-center gap-2'>
+                                            <FaChevronDown className='arrow' />
                                             <span className='text-xl'>{item?.sectionName}</span>
+                                        </div>
+                                        <div className='space-x-4'>
+                                            <span className='text-yellow-25'>
+                                                {item?.subSection?.length || 0} Lecture(s)
+                                            </span>
+                                        </div>
+                                    </summary>
+                                    <div className='mt-5'>
+                                        {item?.subSection?.map((subItem, subIndex) => (
+                                            <div 
+                                                key={subIndex} 
+                                                className='relative overflow-hidden bg-richblack-900 p-5 border border-solid border-richblack-600 flex items-center justify-between cursor-pointer'
+                                                onClick={() => {
+                                                    if (index === 0 && subIndex === 0 && courseDetail?.firstVideoUrl) {
+                                                        setShowFirstVideo(true);
+                                                    }
+                                                }}
+                                            >
+                                                <div className='flex items-center gap-2'>
+                                                    <IoVideocamOutline className='txt-lg text-richblack-5' />
+                                                    <span className='text-lg'>{subItem?.title}</span>
+                                                </div>
+                                                <span className='text-sm text-richblack-200'>
+                                                    {subItem?.timeDuration 
+                                                    ? 
+                                                        Math.floor(subItem.timeDuration / (60*60)) > 0
+                                                    ? 
+                                                        `${Math.floor(subItem.timeDuration / (60*60))} :`
+                                                    :
+                                                        `${Math.floor(subItem.timeDuration / 60)}:${('0' + (subItem.timeDuration % 60).toFixed(0)).slice(-2)}` 
+                                                    : 
+                                                        ''}
+                                                </span>
                                             </div>
-                                            <div className='space-x-4'>
-                                                <span className='text-yellow-25'>{item?.subSection?.length} Lecture(s)</span>
-                                            </div>
-                                        </summary>
-                                        <div className='mt-5'>
-                                            {
-                                                item?.subSection?.map((subItem, subIndex) => (
-                                                    <div key={subIndex} className='relative overflow-hidden bg-richblack-900  p-5 border border-solid border-richblack-600'>
-                                                        <div className='flex items-center gap-2'>
-                                                        <IoVideocamOutline className='txt-lg text-richblack-5'/>
-                                                        <span className='text-lg'>{subItem?.title}</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                ))
-                                            }
-                                            </div>
-                                    </details>
-                                ))
-                            }
+                                        ))}
+                                    </div>
+                                </details>
+                            ))}
                         </div>
                     </div>
                 </div>
                 <div className='mb-12 py-4'>
-            </div>
+                </div>
                 <p className='text-[28px] font-semibold'>
                     Author
                 </p>
@@ -269,46 +331,60 @@ const CourseDetails = () => {
 
             {/* Reviews */}
             <div className='mx-auto box-content px-4 text-start text-richblack-5 lg:w-[1260px]'>
-                <div className='mx-auto max-w-maxContentTab lg:mx-0 xl:max-w-[990px]'>
-                    <div className='my-8 border border-richblack-600 p-3 md:p-8'>
+                <div className='mx-auto max-w-maxContentTab lg:mx-0 xl:max-w-[810px]'>
+                    <div className='my-8 border border-richblack-600 p-8'>
                         <p className='text-3xl font-semibold'>
                             Reviews
                         </p>
                         <div className='mt-5'>
-                            <div className='flex items-center gap-4'>
-                                <div className='flex items-center gap-2'>
-                                    <span className='text-4xl font-semibold'>{avgReviewCount}</span>
-                                    <span className='text-2xl'>/5</span>
-                                    <span className='text-richblack-50'>({courseDetail?.ratingAndReviews?.length} ratings)</span>
-                                    <span className='text-richblack-50'>|</span>
-                                    <span className='text-richblack-50'> {courseDetail?.studentsEnrolled?.length} students</span>
+                            {
+                                courseDetail?.ratingAndReviews?.length > 0 ? (
+                                    <div className='flex flex-col gap-4'>
+                                        {
+                                            courseDetail?.ratingAndReviews?.map((review, index) => (
+                                                <div key={index} className='flex flex-col gap-2'>
+                                                    <div className='flex items-center gap-2'>
+                                                        <img src={review?.user?.image} alt="user img" className='w-[30px] h-[30px] rounded-full object-cover'/>
+                                                        <p className='text-xl font-semibold'>{review?.user?.firstName} {review?.user?.lastName}</p>
+                                                    </div>
+                                                    <div className='flex items-center gap-2'>
+                                                        <RatingStars Review_Count={review?.rating} />
+                                                        <p className='text-richblack-200'>{review?.review}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        }
                                     </div>
-                                </div>
-                                </div>
-                                {
-                                    courseDetail?.ratingAndReviews?.map((item, index) => (
-                                        <div key={index} className='flex flex-col md:items-baseline gap-3 my-4 mt-12 ga'>
-                                            <div className='flex items-center gap-2'>
-                                                <img src={item?.user?.image} alt="user img" className='w-[30px] h-[30px] rounded-full object-cover'/>
-                                                <div className='flex flex-col'>
-                                                    <p className='md:text-xl min-w-max font-semibold'>{item?.user?.firstName} {item?.user?.lastName}</p>
-                                                </div>
-                                            </div>
-                                            <div className='flex flex-col gap-2'>
-                                                <div className='flex items-center gap-2'>
-                                                    <RatingStars Review_Count={item?.rating}/>
-                                                </div>
-                                                <p className='text-richblack-50 text-[12px] md:text-sm max-w-4xl'>{item?.review}</p>
-                                            </div>
-                                        </div>
-                                    ))
-                                }
-                                </div>
-                                </div>
-                                </div>
-                                
-
-        </div>
+                                ) : (
+                                    <p className='text-richblack-200'>No reviews yet</p>
+                                )
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {/* Show iframe for first video if clicked */}
+        {showFirstVideo && courseDetail?.firstVideoUrl && (
+            <div className="m-auto w-full flex full overflow-y-auto fixed inset-0 z-50 justify-center items-center bg-richblack-900 bg-opacity-30 backdrop-blur-md ">
+                <div className='text-red-500 p-1 rounded-full bg-richblack-700 absolute top-6 right-6 scale-[2] cursor-pointer'
+                    onClick={()=>setShowFirstVideo(false)}
+                >
+                    <IoCloseOutline/>
+                </div>
+                <iframe
+                    src={courseDetail?.firstVideoUrl}
+                    title="First Video"
+                    // width="640"
+                    // height="360"
+                    width="1280"
+                    height="720"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="rounded-lg border border-richblack-600"
+                ></iframe>
+            </div>
+        )}
+    </div>
   )
 }
 

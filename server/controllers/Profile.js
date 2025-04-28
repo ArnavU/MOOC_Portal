@@ -2,10 +2,26 @@ const Profile = require("../models/Profile");
 const User = require("../models/User");
 const Course = require("../models/Course");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
+const cloudinary = require("cloudinary").v2;
+
 // Method for updating a profile
 exports.updateProfile = async (req, res) => {
 	try {
-		const { dateOfBirth = "", about = "", contactNumber="",firstName,lastName,gender="" } = req.body;
+		console.log("Information in req body: ", req.body)
+		const { 
+			dateOfBirth = "", 
+			about = "", 
+			contactNumber = "",
+			firstName,
+			lastName,
+			gender = "",
+			designation = "",
+			prn = "",
+			rollNumber = "",
+			batch = "",
+			year = "",
+			semester = ""
+		} = req.body;
 		const id = req.user.id;
 
 		// Find the profile by id
@@ -17,8 +33,14 @@ exports.updateProfile = async (req, res) => {
 		userDetails.lastName = lastName || userDetails.lastName;
 		profile.dateOfBirth = dateOfBirth || profile.dateOfBirth;
 		profile.about = about || profile.about;
-		profile.gender=gender || profile.gender;
+		profile.gender = gender || profile.gender;
 		profile.contactNumber = contactNumber || profile.contactNumber;
+		profile.designation = designation || profile.designation;
+		profile.prn = prn || profile.prn;
+		profile.rollNumber = rollNumber || profile.rollNumber;
+		profile.batch = batch || profile.batch;
+		profile.year = year || profile.year;
+		profile.semester = semester || profile.semester;
 
 		// Save the updated profile
 		await profile.save();
@@ -122,38 +144,68 @@ exports.getEnrolledCourses=async (req,res) => {
     }
 }
 
+const deletePrevPhoto = async (url) => {
+	const extractPublicId = (url) => {
+		const regex = /\/upload\/(?:v\d+\/)?(.+?)\.(mp4|webm|mov|avi|png|jpg|svg|jpeg)/;
+		const match = url.match(regex);
+		return match ? match[1] : null;
+	};
+	  
+	const publicId = extractPublicId(url);
+	if(!publicId) {
+		console.log("NO public id found: ", url, publicId);
+		return;
+	}
+
+	console.log("URL: ", url)
+	console.log("Public id: ", publicId)
+	try {
+		const result = await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+		console.log("✅ Successfully deleted profile photo from cloudinary:", result);
+	} catch (error) {
+		console.error("❌ Error deleting profile photo from cloudinary:", error.message);
+		return res.status(500).json({
+			success: false,
+			message: "Error deleting profile photo from cloudinary",
+			error: error.message
+		});
+	}
+}
+
 //updateDisplayPicture
 exports.updateDisplayPicture = async (req, res) => {
 	try {
-
 		const id = req.user.id;
-	const user = await User.findById(id);
-	if (!user) {
-		return res.status(404).json({
-            success: false,
-            message: "User not found",
-        });
-	}
-	const image = req.files.pfp;
-	if (!image) {
-		return res.status(404).json({
-            success: false,
-            message: "Image not found",
-        });
-    }
-	const uploadDetails = await uploadImageToCloudinary(
-		image,
-		process.env.FOLDER_NAME
-	);
-	console.log(uploadDetails);
+		const user = await User.findById(id);
+		if (!user) {
+			return res.status(404).json({
+	            success: false,
+	            message: "User not found",
+	        });
+		}
+		const image = req.files.pfp;
+		if (!image) {
+			return res.status(404).json({
+	            success: false,
+	            message: "Image not found",
+	        });
+	    }
 
-	const updatedImage = await User.findByIdAndUpdate({_id:id},{image:uploadDetails.secure_url},{ new: true });
+		await deletePrevPhoto(user.image);
 
-    res.status(200).json({
-        success: true,
-        message: "Image updated successfully",
-        data: updatedImage,
-    });
+		const uploadDetails = await uploadImageToCloudinary(
+			image,
+			process.env.FOLDER_NAME
+		);
+		console.log(uploadDetails);
+
+		const updatedImage = await User.findByIdAndUpdate({_id:id},{image:uploadDetails.secure_url},{ new: true });
+
+	    res.status(200).json({
+	        success: true,
+	        message: "Image updated successfully",
+	        data: updatedImage,
+	    });
 		
 	} catch (error) {
 		return res.status(500).json({
@@ -162,9 +214,6 @@ exports.updateDisplayPicture = async (req, res) => {
         });
 		
 	}
-
-
-
 }
 
 //instructor dashboard

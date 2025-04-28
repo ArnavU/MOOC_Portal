@@ -35,6 +35,8 @@ const {
   createSection,
   updateSection,
   deleteSection,
+  uploadAttachment,
+  deleteAttachment,
 } = require("../controllers/Section")
 
 // Sub-Sections Controllers Import
@@ -55,7 +57,7 @@ const {
 const { isDemo } = require("../middlewares/demo");
 
 // Importing Middlewares
-const { auth, isInstructor, isStudent, isAdmin, isHOD } = require("../middlewares/auth")
+const { auth, isInstructor, isStudent, isAdmin, isHOD, addUserToRequest } = require("../middlewares/auth")
 
 // ********************************************************************************************************
 //                                      Course routes
@@ -69,6 +71,10 @@ router.post("/addSection", auth, isInstructor, createSection)
 router.post("/updateSection", auth, isInstructor, updateSection)
 // Delete a Section
 router.post("/deleteSection", auth, isInstructor,isDemo, deleteSection)
+// Upload an attachment to a Section
+router.post("/uploadAttachment", auth, isInstructor, uploadAttachment)
+// Delete an attachment from a Section
+router.post("/deleteAttachment", auth, isInstructor, deleteAttachment)
 // Edit Sub Section
 router.post("/updateSubSection", auth, isInstructor, updateSubSection)
 // Delete Sub Section
@@ -78,7 +84,7 @@ router.post("/addSubSection", auth, isInstructor, createSubSection)
 // Get all Registered Courses
 router.get("/getAllCourses", getAllCourses)
 // Get Details for a Specific Courses
-router.post("/getCourseDetails", getCourseDetails)
+router.post("/courseDetails", addUserToRequest, getCourseDetails)
 // Edit a Course
 router.post("/editCourse", auth, isInstructor,isDemo, editCourse)
 // Get all Courses of a Specific Instructor

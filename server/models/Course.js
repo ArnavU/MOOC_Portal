@@ -33,6 +33,11 @@ const coursesSchema = new mongoose.Schema({
 			ref: "Section",
 		},
 	],
+	totalVideos: {
+		type: Number,
+		required: true,
+		default: 0,
+	},
 	// ratingAndReviews: [
 	// 	{
 	// 		type: mongoose.Schema.Types.ObjectId,

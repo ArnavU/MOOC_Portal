@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import IconBtn from '../../common/IconBtn'
 import {FiEdit} from "react-icons/fi"
+import { ACCOUNT_TYPE } from '../../../utils/constants'
 
 const MyProfile = () => {
 
@@ -38,7 +39,7 @@ const MyProfile = () => {
         </div>
 
         {/* section 2 */}
-        <div className='my-10 flex flex-col gap-y-3 md:gap-y-10 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-3 md:p-8 md:px-12'>
+        <div className='my-10 flex flex-col gap-y-3 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-3 md:p-8 md:px-12'>
             <div className='flex w-full items-center justify-between'>
                 <p className='text-lg font-semibold text-richblack-5'>About</p>
                 <div >
@@ -79,6 +80,12 @@ const MyProfile = () => {
                     <p className='mb-2 text-sm text-richblack-100'>Gender</p>
                     <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.gender ?? "Add Gender"}</p>
                 </div>
+                {user?.additionalDetails.designation &&
+                    <div>
+                        <p className='mb-2 text-sm text-richblack-100'>Designation</p>
+                        <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.designation ?? "-"}</p>
+                    </div>
+                }
                 </div>
 
 
@@ -97,12 +104,47 @@ const MyProfile = () => {
                 </div>
             </div>
         </div>
+        </div>
 
-      </div>
-    </div>
-    </div>
-    
-  )
-}
+        {/* section 4 - Academic Details */}
+        {user.accountType === ACCOUNT_TYPE.STUDENT &&
+        
+            <div className='my-10 flex flex-col gap-y-10 rounded-md border-[1px] border-richblack-700 bg-richblack-800 p-3 md:p-8 md:px-12'>
+                <div className='flex w-full items-center justify-between'>
+                    <p className='text-lg font-semibold text-richblack-5'>Academic Details</p>
+                </div>
+                <div className='flex gap-y-5 md:flex-row flex-col max-w-[500px] justify-between'>
+                    <div className='flex flex-col gap-y-5'>
+                        <div>
+                            <p className='mb-2 text-sm text-richblack-100'>PRN</p>
+                            <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.prn || "-"}</p>
+                        </div>
+                        <div>
+                            <p className='mb-2 text-sm text-richblack-100'>Roll Number</p>
+                            <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.rollNumber || "-"}</p>
+                        </div>
+                        <div>
+                            <p className='mb-2 text-sm text-richblack-100'>Semester</p>
+                            <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.semester || "-"}</p>
+                        </div>
+                    </div>
 
+                    <div className='flex flex-col gap-y-5'>
+                        <div>
+                            <p className='mb-2 text-sm text-richblack-100'>Batch</p>
+                            <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.batch || "-"}</p>
+                        </div>
+                        <div>
+                            <p className='mb-2 text-sm text-richblack-100'>Year</p>
+                            <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.year || "-"}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+
+  </div>
+)}
 export default MyProfile

@@ -51,9 +51,35 @@ exports.createSubSection = async (req, res) => {
 			{ new: true }
 		).populate("subSection");
 
-		const updatedCourse = await Course.findById(courseId).populate({ path: "courseContent", populate: { path: "subSection" } }).exec();
-		// Return the updated section in the response
-		return res.status(200).json({ success: true, data: updatedCourse });
+		// Get the updated course with all sections and subsections
+		const updatedCourse = await Course.findById(courseId)
+			.populate({ 
+				path: "courseContent", 
+				populate: { 
+					path: "subSection" 
+				} 
+			})
+			.exec();
+		
+		// Calculate total videos
+		let totalVideos = 0;
+		updatedCourse.courseContent.forEach(section => {
+			totalVideos += section.subSection.length;
+		});
+
+		// Update the course with the new total videos count
+		await Course.findByIdAndUpdate(
+			courseId,
+			{ totalVideos: totalVideos },
+			{ new: true }
+		);
+
+		// Return the updated course in the response
+		return res.status(200).json({ 
+			success: true, 
+			data: updatedCourse,
+			message: "Subsection created successfully."
+		});
 	} catch (error) {
 		// Handle any errors that may occur during the process
 		console.error("Error creating new sub-section:", error);
@@ -161,7 +187,24 @@ exports.deleteSubSection = async(req, res) => {
 	await Section.findByIdAndUpdate({_id:sectionId},{$pull:{subSection:subSectionId}},{new:true});
 	const updatedCourse = await Course.findById(courseId).populate({ path: "courseContent", populate: { path: "subSection" } }).exec();
 
-	return res.status(200).json({ success: true, message: "Sub-section deleted", data: updatedCourse });
+	// Calculate total videos after deletion
+	let totalVideos = 0;
+	updatedCourse.courseContent.forEach(section => {
+		totalVideos += section.subSection.length;
+	});
+
+	// Update the course with the new total videos count
+	await Course.findByIdAndUpdate(
+		courseId,
+		{ totalVideos: totalVideos },
+		{ new: true }
+	);
+
+	return res.status(200).json({ 
+		success: true, 
+		message: "Sub-section deleted and total videos updated", 
+		data: updatedCourse 
+	});
 		
 	} catch (error) {
 		// Handle any errors that may occur during the process

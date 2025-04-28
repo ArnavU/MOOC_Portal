@@ -5,8 +5,8 @@ import { useForm } from 'react-hook-form';
 
 const RequirementField = ({name, label, register, errors, setValue, getValues}) => {
     const [requirement, setRequirement] = useState("");
-    const [requirementList, setRequirementList] = useState([]);
     const {editCourse, course} = useSelector((state) => state.course);
+    const [requirementList, setRequirementList] = useState(course?.instructions || []);
 
 
     useEffect(()=> {
@@ -16,24 +16,26 @@ const RequirementField = ({name, label, register, errors, setValue, getValues}) 
         })
     },[])
 
-    useEffect(()=> {
-        setValue(name, requirementList);
-        if(editCourse) {
-            setRequirementList(course?.instructions);
-            setValue(name, course?.instructions);
-        }
-    },[requirementList])
+    // useEffect(()=> {
+    //     setValue(name, requirementList);
+    //     if(editCourse) {
+    //         setRequirementList(course?.instructions);
+    //         setValue(name, course?.instructions);
+    //     }
+    // },[requirementList])
 
     const handleAddRequirement = () => {
         if(requirement) {
+            setValue(name, [...requirementList, requirement]);
             setRequirementList([...requirementList, requirement]);
-            //setRequirement("");
+            setRequirement("");
         }
     }
 
     const handleRemoveRequirement = (index) => {
         const updatedRequirementList = [...requirementList];
         updatedRequirementList.splice(index, 1);
+        setValue(name, updatedRequirementList);
         setRequirementList(updatedRequirementList);
     }
 

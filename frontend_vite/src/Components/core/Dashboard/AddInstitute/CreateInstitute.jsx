@@ -28,6 +28,7 @@ const CreateInstitute = () => {
             formData.append('adminFirstName', data.adminFirstName)
             formData.append('adminLastName', data.adminLastName)
             formData.append('adminEmail', data.adminEmail)
+            formData.append('password', data.password)
             formData.append('instituteName', data.instituteName)
             formData.append('instituteAddress', data.instituteAddress)
             formData.append('contactNumber', data.contactNumber)
@@ -121,6 +122,31 @@ const CreateInstitute = () => {
                             {errors.adminEmail && (
                                 <span className="ml-2 text-xs tracking-wide text-pink-200">
                                     {errors.adminEmail.message || 'Admin Email is Required**'}
+                                </span>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="text-sm text-richblack-5" htmlFor="password">
+                                Admin Password<sup className="text-pink-200">*</sup>
+                            </label>
+                            <input
+                                type="password"
+                                name="password"
+                                id="password"
+                                placeholder="Enter Admin Password"
+                                {...register('password', {
+                                    required: true,
+                                    minLength: {
+                                        value: 8,
+                                        message: 'Password must be at least 8 characters long',
+                                    },
+                                })}
+                                className="form-style w-full"
+                            />
+                            {errors.password && (
+                                <span className="ml-2 text-xs tracking-wide text-pink-200">
+                                    {errors.password.message || 'Password is Required**'}
                                 </span>
                             )}
                         </div>

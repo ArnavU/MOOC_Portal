@@ -30,6 +30,8 @@ const {
   APPROVE_COURSE_API,
   GET_DEPARTMENT_COURSES_API,
   GET_APPROVED_INSTRUCTOR_COURSES,
+  UPLOAD_ATTACHMENT_API,
+  DELETE_ATTACHMENT_API,
 } = courseEndpoints;
 
 export const getAllCourses = async () => {
@@ -62,7 +64,7 @@ export const fetchCourseDetails = async (courseId, dispatch) => {
     if (!response.data.success) {
       throw new Error(response.data.message);
     }
-    result = response.data.data[0];
+    result = response.data.data;
   } catch (error) {
     console.log("COURSE_DETAILS_API API ERROR............", error);
     result = error.response.data;
@@ -103,7 +105,6 @@ export const addCourseDetails = async (data) => {
     if (!response?.data?.success) {
       throw new Error("Could Not Add Course Details");
     }
-    toast.success("Course Details Added Successfully");
     result = response?.data?.data;
   } catch (error) {
     console.log("CREATE COURSE API ERROR............", error);
@@ -125,7 +126,6 @@ export const editCourseDetails = async (data) => {
     if (!response?.data?.success) {
       throw new Error("Could Not Update Course Details");
     }
-    toast.success("Course Details Updated Successfully");
     result = response?.data?.data;
   } catch (error) {
     console.log("EDIT COURSE API ERROR............", error);
@@ -386,13 +386,15 @@ export const createRating = async (data, token) => {
     }
     toast.success("Rating Posted");
     success = true;
+    return success;
   } catch (error) {
     success = false;
     console.log("CREATE RATING API ERROR............", error);
     toast.error(error.response.data.message);
   }
-  toast.dismiss(toastId);
-  return success;
+  finally{
+    toast.dismiss(toastId);
+  }
 };
 
 //add course to Category
@@ -528,4 +530,50 @@ export const fetchApprovedInstructorCourses = async () => {
   } finally {
     toast.dismiss(toastId);
   }
+};
+
+export const uploadAttachment = async (sectionId, courseId, file) => {
+  let result = null;
+  const toastId = toast.loading("Uploading attachment...");
+  try {
+    const formData = new FormData();
+    formData.append("sectionId", sectionId);
+    formData.append("courseId", courseId);
+    formData.append("attachment", file);
+    const response = await apiConnector("POST", UPLOAD_ATTACHMENT_API, formData, {
+      "Content-Type": "multipart/form-data",
+    });
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not upload attachment");
+    }
+    toast.success("Attachment uploaded successfully");
+    result = response.data.updatedCourse;
+  } catch (error) {
+    console.log("UPLOAD_ATTACHMENT_API ERROR............", error);
+    toast.error(error?.response?.data?.message || "Could not upload attachment");
+  }
+  toast.dismiss(toastId);
+  return result;
+};
+
+export const deleteAttachment = async (sectionId, courseId, url) => {
+  let result = null;
+  const toastId = toast.loading("Deleting attachment...");
+  try {
+    const response = await apiConnector("POST", DELETE_ATTACHMENT_API, {
+      sectionId,
+      courseId,
+      url,
+    });
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not delete attachment");
+    }
+    toast.success("Attachment deleted successfully");
+    result = response.data.updatedCourse;
+  } catch (error) {
+    console.log("DELETE_ATTACHMENT_API ERROR............", error);
+    toast.error(error?.response?.data?.message || "Could not delete attachment");
+  }
+  toast.dismiss(toastId);
+  return result;
 };

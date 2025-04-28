@@ -43,15 +43,17 @@ export async function getUserCourses(token,dispatch){
 
 
 //updateProfilePicture
-export async function updatePfp(token,pfp){
+export async function updatePfp(pfp, dispatch, setUser){
   const toastId = toast.loading("Uploading...");
   try {
+    if(!pfp) {
+      toast.error("Upload a photo first");
+      return;
+    }
     const formData = new FormData();
     console.log("pfp",pfp)
     formData.append('pfp',pfp);
-    const response = await apiConnector("PUT", settingsEndpoints.UPDATE_DISPLAY_PICTURE_API,formData,{
-      Authorisation: `Bearer ${token}`,
-    });
+    const response = await apiConnector("PUT", settingsEndpoints.UPDATE_DISPLAY_PICTURE_API,formData);
     console.log("UPDATE_DISPLAY_PICTURE_API API RESPONSE............", response)
     if (!response.data.success) {
       throw new Error(response.data.message)
@@ -60,11 +62,15 @@ export async function updatePfp(token,pfp){
     const imageUrl = response.data.data.image;
     localStorage.setItem("user",JSON.stringify({...JSON.parse(localStorage.getItem("user")),image:imageUrl}));
     console.log(JSON.parse(localStorage.getItem("user")).image);
+    dispatch(setUser({...JSON.parse(localStorage.getItem('user')), image: imageUrl}));
+
   } catch (error) {
     console.log("UPDATE_DISPLAY_PICTURE_API API ERROR............", error)
     toast.error(error.response.data.message);
   }
-  toast.dismiss(toastId);
+  finally {
+    toast.dismiss(toastId);
+  }
 }
 
 
@@ -72,16 +78,26 @@ export async function updatePfp(token,pfp){
 
 
 //updateAdditionalDetails
-export async function updateAdditionalDetails(token,additionalDetails){
-  console.log("additionalDetails",additionalDetails);
-  const {firstName,lastName,dateOfBirth,gender,contactNumber,about}=additionalDetails;
-  console.log("additionalDetails",additionalDetails);
+export async function updateAdditionalDetails(additionalDetails, dispatch, setUser){
+  const {
+    firstName,
+    lastName,
+    dateOfBirth,
+    gender,
+    contactNumber,
+    about,
+    designation,
+    prn,
+    rollNumber,
+    batch,
+    year,
+    semester
+  } = additionalDetails;
   const toastId = toast.loading("Updating...");
   try {
-    const response = await apiConnector("PUT", settingsEndpoints.UPDATE_PROFILE_API,{firstName,lastName,dateOfBirth,gender,contactNumber,about},{
-      Authorisation: `Bearer ${token}`,
+    const response = await apiConnector("PUT", settingsEndpoints.UPDATE_PROFILE_API, additionalDetails, {
+      contentType: "multipart/form-data"
     });
-    console.log("UPDATE_ADDITIONAL_DETAILS_API API RESPONSE............", response)
     if (!response.data.success) {
       throw new Error(response.data.message)
     }
@@ -89,17 +105,25 @@ export async function updateAdditionalDetails(token,additionalDetails){
     const user = JSON.parse(localStorage.getItem("user"));
     user.firstName = firstName || user.firstName;
     user.lastName = lastName || user.lastName;
-    user.additionalDetails.dateOfBirth = dateOfBirth  || user.additionalDetails.dateOfBirth;
+    user.additionalDetails.dateOfBirth = dateOfBirth || user.additionalDetails.dateOfBirth;
     user.additionalDetails.contactNumber = contactNumber || user.additionalDetails.contactNumber;
     user.additionalDetails.about = about || user.additionalDetails.about;
-    user.additionalDetails.gender=gender
-    localStorage.setItem("user",JSON.stringify(user));
-
+    user.additionalDetails.gender = gender || user.additionalDetails.gender;
+    user.additionalDetails.designation = designation || user.additionalDetails.designation;
+    user.additionalDetails.prn = prn || user.additionalDetails.prn;
+    user.additionalDetails.rollNumber = rollNumber || user.additionalDetails.rollNumber;
+    user.additionalDetails.batch = batch || user.additionalDetails.batch;
+    user.additionalDetails.year = year || user.additionalDetails.year;
+    user.additionalDetails.semester = semester || user.additionalDetails.semester;
+    localStorage.setItem("user", JSON.stringify(user));
+    dispatch(setUser(user));
   } catch (error) {
     console.log("UPDATE_ADDITIONAL_DETAILS_API API ERROR............", error)
     toast.error(error.response.data.message)
   }
-  toast.dismiss(toastId);
+  finally {
+    toast.dismiss(toastId);
+  }
 }
 
 

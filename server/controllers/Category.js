@@ -49,77 +49,117 @@ exports.categoryPageDetails = async (req, res) => {
 	try {
 		const { categoryId } = req.body;
 
-		// Get courses for the specified category
-		const selectedCategory = await Category.findById(categoryId)          //populate instuctor and rating and reviews from courses
-			.populate({
-				path:"courses",
-				match:{status:"Published"},
-				populate:
-				([	{path:"instructor"},
-					{path:"ratingAndReviews"}
-				])
-			})
-			.exec();
-		// console.log(selectedCategory);
-		// Handle the case when the category is not found
-		if (!selectedCategory) {
-			console.log("Category not found.");
-			return res
-				.status(404)
-				.json({ success: false, message: "Category not found" });
-		}
-		// Handle the case when there are no courses
-		if (selectedCategory.courses.length === 0) {
-			console.log("No courses found for the selected category.");
-			return res.status(404).json({
-				success: false,
-				message: "No courses found for the selected category.",
-			});
+		// Validate categoryId
+		if (!categoryId) {
+			return res.status(400).json({ success: false, message: "Category ID is required" });
 		}
 
-		const selectedCourses = selectedCategory.courses;
+		// Get the selected category
+		const selectedCategory = await Category.findById(categoryId);
+		if (!selectedCategory) {
+			return res.status(404).json({ success: false, message: "Category not found" });
+		}
+
+		// Get courses for the selected category
+		let selectedCourses = await Course.find({
+			category: categoryId,
+			status: "Published"
+		})
+		.populate({
+			path: "instructor",
+			select: "firstName lastName email image additionalDetails",
+			populate: { path: "additionalDetails" }
+		})
+		.populate({
+			path: "category",
+			select: "name description"
+		})
+		.populate({
+			path: "courseContent",
+			populate: { path: "subSection", select: "title timeDuration description" }
+		})
+		.lean();
 
 		// Get courses for other categories
-		const categoriesExceptSelected = await Category.find({
-			_id: { $ne: categoryId },
-		}).populate({
-			path:"courses",
-			match:{status:"Published"},
-			populate:([
-				{path:"instructor"},
-				{path:"ratingAndReviews"}
-			])
-		});
+		const otherCategories = await Category.find({ _id: { $ne: categoryId } });
 		let differentCourses = [];
-		for (const category of categoriesExceptSelected) {
-			differentCourses.push(...category.courses);
+		for (const category of otherCategories) {
+			const courses = await Course.find({
+				category: category._id,
+				status: "Published"
+			})
+			.populate({
+				path: "instructor",
+				select: "firstName lastName email image additionalDetails",
+				populate: { path: "additionalDetails" }
+			})
+			.populate({
+				path: "category",
+				select: "name description"
+			})
+			.populate({
+				path: "courseContent",
+				populate: { path: "subSection", select: "title timeDuration description" }
+			})
+			.lean();
+			differentCourses.push(...courses);
 		}
 
-		// Get top-selling courses across all categories
-		const allCategories = await Category.find().populate({
-			path:"courses",match:{status:"Published"},
-			populate:([
-				{path:"instructor"},
-				{path:"ratingAndReviews"}
-			])
-		});
-		const allCourses = allCategories.flatMap((category) => category.courses);
-		const mostSellingCourses = allCourses
-			.sort((a, b) => b.sold - a.sold)
-			.slice(0, 10);
+		// Add avgRating and totalRatings to each course in selectedCourses and differentCourses
+		const allCourseIds = [
+			...selectedCourses.map(c => c._id),
+			...differentCourses.map(c => c._id)
+		];
+		const ratingAgg = await require('../models/RatingAndReview').aggregate([
+			{ $match: { course: { $in: allCourseIds } } },
+			{ $group: {
+				_id: "$course",
+				avgRating: { $avg: "$rating" },
+				totalRatings: { $sum: 1 }
+			}}
+		]);
+		const ratingMap = {};
+		for (const r of ratingAgg) {
+			ratingMap[r._id.toString()] = {
+				avgRating: Math.round((r.avgRating || 0) * 10) / 10,
+				totalRatings: r.totalRatings
+			};
+		}
+		selectedCourses = selectedCourses.map(course => ({
+			...course,
+			avgRating: ratingMap[course._id.toString()]?.avgRating || 0,
+			totalRatings: ratingMap[course._id.toString()]?.totalRatings || 0
+		}));
+		differentCourses = differentCourses.map(course => ({
+			...course,
+			avgRating: ratingMap[course._id.toString()]?.avgRating || 0,
+			totalRatings: ratingMap[course._id.toString()]?.totalRatings || 0
+		}));
 
-		console.log("selectedCourses",selectedCourses);
-		console.log("differentCourses",differentCourses);
-		console.log("mostSellingCourses",mostSellingCourses);	
+		// Get top-selling courses across all categories (assuming 'sold' field exists)
+		const allCourses = await Course.find({ status: "Published" })
+			.populate({
+				path: "instructor",
+				select: "firstName lastName email image additionalDetails",
+				populate: { path: "additionalDetails" }
+			})
+			.populate({
+				path: "category",
+				select: "name description"
+			})
+			.populate({
+				path: "courseContent",
+				populate: { path: "subSection", select: "title timeDuration description" }
+			})
+			.lean();
 
 		res.status(200).json({
-			selectedCourses: selectedCourses,
-			differentCourses: differentCourses,
-			mostSellingCourses: mostSellingCourses,
 			success: true,
+			selectedCourses,
+			differentCourses,
 		});
 	} catch (error) {
-		console.log("error in category page details",error.message);
+		console.log("error in category page details", error.message);
 		return res.status(500).json({
 			success: false,
 			message: "Internal server error",

@@ -132,7 +132,7 @@ const NavBar = ({ setProgress }) => {
                                     </Link>
                                 )
                             }
-                            {
+                            {/* {
                                 token == null && (
                                     <Link to='/signup' className='text-yellow-50' onClick={() => { dispatch(setProgress(100)) }} >
                                         <button onClick={shownav} className='mt-4 text-center text-[15px] px-5 py-2 rounded-md font-semibold bg-yellow-50 text-black hover:scale-95 transition-all duration-200' >
@@ -141,7 +141,7 @@ const NavBar = ({ setProgress }) => {
                                     </Link>
 
                                 )
-                            }
+                            } */}
 
                             {
                                 token != null && (
@@ -265,7 +265,7 @@ const NavBar = ({ setProgress }) => {
                             </Link>
                         )
                     }
-                    {
+                    {/* {
                         token == null && (
                             <Link to='/signup' className='text-richblack-25' onClick={() => { dispatch(setProgress(100)) }} >
                                 <button className='rounded-[8px] border border-richblack-700 bg-richblack-800 px-[12px] py-[7px] text-richblack-100' >
@@ -273,7 +273,7 @@ const NavBar = ({ setProgress }) => {
                                 </button>
                             </Link>
                         )
-                    }
+                    } */}
                     {
                         token !== null && (
                             <div className=' pt-2' >

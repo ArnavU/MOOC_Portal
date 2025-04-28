@@ -53,7 +53,7 @@ export const sidebarLinks = [
   {
     id: 7,
     name: "Assigned Courses",
-    path: "/dashboard/assigned-courses",
+    path: "/dashboard/unenrolled-courses",
     type: ACCOUNT_TYPE.STUDENT,
     icon: "VscTasklist",
   },

@@ -92,10 +92,17 @@ const CourseDetailsModal = ({ course, onClose }) => {
                   </p>
                   <p className="text-richblack-300 text-sm">{course.instructor?.email}</p>
                 </div>
-
-                <div>
-                  <h3 className="text-xl font-medium text-richblack-5 mb-3">Enrolled Students</h3>
-                  <p className="text-richblack-200 text-base">{course.studentsEnrolled?.length || 0} students</p>
+                   
+                <div className="relative flex flex-row gap-8 justify-between w-fit">
+                  <div>
+                    <h3 className="text-xl font-medium text-richblack-5 mb-3">Allocation Count</h3>
+                    <p className="text-richblack-200 text-base">{course?.total_allocation || 0} students</p>
+                  </div>
+                  <div className="absolute left-[50%] h-full w-0.5 bg-richblack-300"></div>
+                  <div>
+                    <h3 className="text-xl font-medium text-richblack-5 mb-3">Enrollment Count</h3>
+                    <p className="text-richblack-200 text-base">{course?.total_enrollment || 0} students</p>
+                  </div>
                 </div>
               </div>
             </div>

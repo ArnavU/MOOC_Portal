@@ -22,12 +22,15 @@ export const studentEndpoints = {
   COURSE_PAYMENT_API: BASE_URL + "/payment/capturePayment",
   COURSE_VERIFY_API: BASE_URL + "/payment/verifyPayment",
   SEND_PAYMENT_SUCCESS_EMAIL_API: BASE_URL + "/payment/sendPaymentSuccessEmail",
+  GET_UNENROLLED_COURSES_API: BASE_URL + "/student/unenrolledCourses",
+  GET_ENROLLED_COURSES_API: BASE_URL + "/student/enrolledCourses",
+  ENROLL_IN_COURSE_API: BASE_URL + "/student/enrollInCourse",
 };
 
 // COURSE ENDPOINTS
 export const courseEndpoints = {
   GET_ALL_COURSE_API: BASE_URL + "/course/getAllCourses",
-  COURSE_DETAILS_API: BASE_URL + "/course/getCourseDetails",
+  COURSE_DETAILS_API: BASE_URL + "/course/courseDetails",
   EDIT_COURSE_API: BASE_URL + "/course/editCourse",
   COURSE_CATEGORIES_API: BASE_URL + "/course/showAllCategories",
   CREATE_COURSE_API: BASE_URL + "/course/createCourse",
@@ -50,6 +53,8 @@ export const courseEndpoints = {
   APPROVE_COURSE_API: BASE_URL + "/course/approveCourse",
   GET_DEPARTMENT_COURSES_API: BASE_URL + "/course/getDepartmentCourses",
   GET_APPROVED_INSTRUCTOR_COURSES: BASE_URL + "/course/approvedInstructorCourses",
+  UPLOAD_ATTACHMENT_API: BASE_URL + "/course/uploadAttachment",
+  DELETE_ATTACHMENT_API: BASE_URL + "/course/deleteAttachment",
 };
 
 // INSTRUCTOR ENDPOINTS

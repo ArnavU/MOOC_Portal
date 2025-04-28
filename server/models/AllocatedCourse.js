@@ -42,12 +42,6 @@ const courseAssignmentSchema = new mongoose.Schema({
         enum: ["Active", "Expired"],
         default: "Active"
     },
-    progress: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 100
-    },
     // This is the array of lectures that the student has completed
     completedLectures: {
         type: mongoose.Schema.Types.ObjectId,
