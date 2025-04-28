@@ -1,6 +1,6 @@
 import loginImg from "../assets/Images/login.webp";
 import Template from "../Components/core/Auth/Template";
-import { login } from "../services/operations/authAPI";
+import { login } from "../services/operations/authAPI.js";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

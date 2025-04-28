@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import OTPInput from 'react-otp-input'
 import { useSelector,useDispatch } from 'react-redux';
-import { signUp } from '../services/operations/authAPI';
+import { signUp } from '../services/operations/authAPI.js';
 import { useNavigate } from 'react-router-dom';
 
 const VerifyOtp = () => {

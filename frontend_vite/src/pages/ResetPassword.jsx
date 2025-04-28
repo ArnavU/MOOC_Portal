@@ -2,7 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link, useLocation } from 'react-router-dom'
-import { resetPassword } from '../services/operations/authAPI'
+import { resetPassword } from '../services/operations/authAPI.js'
 import { useDispatch } from 'react-redux'
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'
 

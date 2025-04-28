@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 
 import { sidebarLinks } from '../../../data/dashboard-links'
-import {logout} from "../../../services/operations/authAPI"
+import {logout} from "../../../services/operations/authAPI.js"
 import { useDispatch, useSelector } from 'react-redux'
 import SidebarLink from './SidebarLink'
 import { useNavigate } from 'react-router-dom'
