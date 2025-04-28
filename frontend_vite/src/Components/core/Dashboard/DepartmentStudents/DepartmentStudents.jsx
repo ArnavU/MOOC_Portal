@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiUser, FiBook, FiEye, FiFilter } from 'react-icons/fi';
-import { fetchDepartmentStudents } from '../../../../services/operations/instructorAPI';
+import { fetchDepartmentStudents } from '../../../../services/operations/InstructorAPI';
 import CourseDetailsModal from './CourseDetailsModal';
 
 const DepartmentStudents = () => {

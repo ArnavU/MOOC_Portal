@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { createHOD, getAllDepartments } from '../../../../../services/operations/instituteAdminAPI.js.jsx';
+import { createHOD, getAllDepartments } from '../../../../../services/operations/InstituteAdminAPI.js.jsx';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 

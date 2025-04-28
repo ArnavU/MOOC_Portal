@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiChevronRight, FiSearch, FiCheck, FiX, FiUsers, FiArrowLeft } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
 import { fetchApprovedInstructorCourses } from '../../../../services/operations/courseDetailsAPI';
-import { fetchDepartmentStudents, allocateCourseToStudents } from '../../../../services/operations/instructorAPI';
+import { fetchDepartmentStudents, allocateCourseToStudents } from '../../../../services/operations/InstructorAPI';
 
 const CourseAssignmentWizard = ({ onBack }) => {
     const [currentStep, setCurrentStep] = useState(1);

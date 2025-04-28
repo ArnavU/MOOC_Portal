@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { updateHOD } from "../../../../../services/operations/instituteAdminAPI.js";
+import { updateHOD } from "../../../../../services/operations/InstituteAdminAPI.js";
 import { toast } from "react-hot-toast";
 
 const EditHODModal = ({ isOpen, onClose, hod, onUpdate }) => {

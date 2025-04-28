@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiBook, FiUser, FiCalendar, FiCheckCircle, FiXCircle, FiEye } from 'react-icons/fi';
-import { fetchCourseAllocations } from '../../../../services/operations/instructorAPI';
+import { fetchCourseAllocations } from '../../../../services/operations/InstructorAPI';
 import CourseDetailsModal from './CourseDetailsModal';
 
 const CourseAllocations = () => {
