@@ -30,8 +30,6 @@ exports.getAllHODs = async (req, res) => {
 
 // Create Department
 exports.createDepartment = async (req, res) => {
-    console.log("Create department called");
-    console.log("Request user: ", req.user);
     try {
         const { name, code, description } = req.body;
 

@@ -80,7 +80,7 @@ const MyProfile = () => {
                     <p className='mb-2 text-sm text-richblack-100'>Gender</p>
                     <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.gender ?? "Add Gender"}</p>
                 </div>
-                {user?.additionalDetails.designation &&
+                {user?.additionalDetails?.designation &&
                     <div>
                         <p className='mb-2 text-sm text-richblack-100'>Designation</p>
                         <p className='text-sm font-medium text-richblack-5'>{user?.additionalDetails?.designation ?? "-"}</p>

@@ -13,16 +13,21 @@ import {MdOutlineReplayCircleFilled} from 'react-icons/md';
 import { markLectureAsComplete } from '../../../services/operations/courseDetailsAPI';
 import { setCompletedLectures } from '../../../slices/viewCourseSlice';
 import { useDispatch } from 'react-redux';
+import QuizModal from './QuizModal';
+import { setOpenQuizModal, setQuizDetails, setSelectedQuizSubSectionId, setSubmittedQuizzesDetails } from '../../../slices/quizSlice';
+import { getSubmittedQuizzes } from '../../../services/operations/quizAPI';
 
 
 
 const VideoDetails = () => {
-  const {courseId,sectionId,subsectionId} = useParams();
+  const {courseId, sectionId, subsectionId} = useParams();
   const dispatch = useDispatch();
   const {token} = useSelector(state => state.auth);
   const {user}= useSelector(state => state.profile);
   // console.log("user",user._id);
   const {courseSectionData, courseEntireData, completedLectures, totalNoOfLectures} = useSelector(state => state.viewCourse);
+  const {quizDetails, openQuizModal, reloadQuizzesDetails} = useSelector(state => state.quizDetails);
+
   const navigate = useNavigate();
   const playerRef = React.useRef(null);
 
@@ -112,11 +117,18 @@ const VideoDetails = () => {
     console.log("lecture completed", completedLectures);
   }
 
-  //set video end to false when .play() is called
+  useEffect(() => {
+    const fetchSubmittedQuizzesDetails = async () => {
+      const quizDetails = await getSubmittedQuizzes(courseId);
+      console.log("Submitted Quiz Details", quizDetails);
+      dispatch(setSubmittedQuizzesDetails(quizDetails));
+    }
+    fetchSubmittedQuizzesDetails();
+  }, [reloadQuizzesDetails])
  
    
   return (
-    <div className='md:w-[calc(100vw-320px)] w-screen p-3'>
+    <div className='relative md:w-[calc(100vw-320px)] w-screen p-3'>
       {
         !videoData ? <h1>Loading...</h1> :
         (
@@ -183,6 +195,19 @@ const VideoDetails = () => {
         <h1 className='text-2xl font-bold text-richblack-25'>{videoData?.title}</h1>
         <p className='text-gray-500 text-richblack-100'>{videoData?.description}</p>
         </div>
+
+
+      {/* quiz modal */}
+      {openQuizModal && 
+        <QuizModal 
+          onClose={() => {
+            dispatch(setQuizDetails(null))
+            dispatch(setOpenQuizModal(false))
+            dispatch(setSelectedQuizSubSectionId(null))
+          }} 
+          quiz={quizDetails} 
+        />
+      }
     </div>
   )
 }

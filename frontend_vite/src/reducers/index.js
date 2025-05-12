@@ -5,6 +5,7 @@ import profieReducer from "../slices/profileSlice";
 import loadingBarReducer from "../slices/loadingBarSlice"
 import courseReducer from '../slices/courseSlice'
 import viewCourseReducer from "../slices/viewCourseSlice";
+import quizReducer from "../slices/quizSlice";
 
 const rootReducer=combineReducers({
     auth:authReducer,
@@ -13,7 +14,7 @@ const rootReducer=combineReducers({
     loadingBar: loadingBarReducer,
     course:courseReducer,
     viewCourse:viewCourseReducer,
-    
+    quizDetails: quizReducer,
 })
 
 export default rootReducer;
