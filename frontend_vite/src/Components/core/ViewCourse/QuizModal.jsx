@@ -71,7 +71,7 @@ const QuizModal = ({ onClose, quiz }) => {
   }, [submittedQuizzesDetails, selectedQuizSubSectionId]);
 
   return (
-    <div className="absolute top-0 left-0 h-full w-full flex items-center justify-center bg-black bg-opacity-50 text-richblack-5">
+    <div className="absolute top-0 left-0 h-full z-10 w-full flex items-center justify-center bg-black bg-opacity-50 text-richblack-5">
       <div className="w-full h-full overflow-y-auto rounded-lg bg-richblack-900 p-6 shadow-lg">
         <h2 className="text-2xl font-bold mb-1">{quiz.title}</h2>
         <p className="text-richblack-200 mb-6">{quiz.description}</p>

@@ -193,7 +193,7 @@ const VideoDetails = () => {
       {/* video title and desc */}
       <div className='mt-5'>
         <h1 className='text-2xl font-bold text-richblack-25'>{videoData?.title}</h1>
-        <p className='text-gray-500 text-richblack-100'>{videoData?.description}</p>
+        <p className='text-gray-500'>{videoData?.description}</p>
         </div>
 
 

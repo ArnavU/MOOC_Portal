@@ -8,17 +8,46 @@ import { useNavigate } from 'react-router';
 import { IoVideocamOutline } from 'react-icons/io5'
 import { FiUser } from 'react-icons/fi'
 import { formatLastAccessed } from "../../../../utils/formatLastAccessed"
+import { downloadCertificate, getCertificate } from '../../../../services/operations/certificateAPI';
+import { FaEye, FaTimes, FaDownload } from "react-icons/fa";
 
 const EnrolledCourses = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState(null);
     const [enrolledData, setEnrolledData] = useState({
         activeCourses: 0,
         totalCourses: 0,
         expiredCourses: 0,
         courses: []
     });
+
+    const downloadCerfificateHandler = async (courseId) => {
+        try {
+            await downloadCertificate(courseId);
+        } catch (error) {
+            console.error("Error downloading certificate:", error);
+        }
+    }
+
+    const handlePreview = async (courseId) => {
+        const url = await getCertificate(courseId);
+        setPdfUrl(url);
+    };
+
+    const handleClose = () => {
+        setPdfUrl(null);
+    };
+
+    
+      useEffect(() => {
+        return () => {
+          if (pdfUrl) {
+            URL.revokeObjectURL(pdfUrl);
+          }
+        };
+      }, [pdfUrl]);
 
     useEffect(() => {
         const fetchEnrolledCourses = async () => {
@@ -137,13 +166,31 @@ const EnrolledCourses = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-auto">
+                                    <div className="mt-auto flex flex-row items-center justify-between">
                                         <button
                                             onClick={() => navigate(`/courses/${course.courseId}`)}
                                             className="rounded-md bg-yellow-50 px-4 py-2 text-sm font-medium text-richblack-900 transition-all duration-200 hover:bg-yellow-100"
                                         >
                                             Continue Learning
                                         </button>
+                                        {course.progress?.percentage == 100 && 
+                                            <div className='flex gap-4'>
+                                                <button
+                                                    onClick={() => handlePreview(course.courseId)}
+                                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
+                                                >
+                                                    <FaEye className="w-4 h-4" />
+                                                    View Certificate
+                                                </button>
+                                                <button
+                                                  onClick={() => downloadCerfificateHandler(course.courseId)}
+                                                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md shadow hover:bg-blue-700 transition duration-200"
+                                                >
+                                                  <FaDownload className="w-4 h-4" />
+                                                  Download Certificate
+                                                </button>
+                                            </div>
+                                        }   
                                     </div> 
                                 </div>
                             </div>
@@ -151,6 +198,24 @@ const EnrolledCourses = () => {
                     )}
                 </div>
             </div>
+            {pdfUrl && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                  <div className="relative w-11/12 md:w-3/4 h-5/6 bg-white rounded-lg shadow-lg ">
+                    <button
+                      onClick={handleClose}
+                      className="absolute z-50 top-0 left-full -translate-x-1/2 -translate-y-1/2 p-2 rounded-full bg-richblack-300 text-gray-600 hover:text-black text-xl "
+                      title="Close"
+                    >
+                      <FaTimes />
+                    </button>
+                    <iframe
+                      src={pdfUrl}
+                      title="Certificate Preview"
+                      className="w-full h-full border-none"
+                    ></iframe>
+                  </div>
+                </div>
+            )}
         </div>
     )
 }

@@ -144,3 +144,7 @@ export const QUIZ_API = {
   SUBMIT_QUIZ_API: BASE_URL + "/quiz/submit",
   GET_SUBMITTED_QUIZZES_API: BASE_URL + "/quiz/submittedQuizes",
 };
+
+export const CERTIFICATE_API = {
+  GET_CERTIFICATE_API : BASE_URL + "/certificate/generate",
+}

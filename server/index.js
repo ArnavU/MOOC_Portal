@@ -16,6 +16,7 @@ const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/Student");
 const {createServiceProvider} = require('./controllers/developer')
 const quizRoutes = require('./routes/Quiz')
+const certificateRoutes = require('./routes/Certificate')
 
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
@@ -70,6 +71,8 @@ app.use("/api/v1/instructor", instructorRoutes);
 app.use("/api/v1/student", studentRoutes);
 
 app.use("/api/v1/quiz", quizRoutes);
+
+app.use("/api/v1/certificate", certificateRoutes);
 
 
 // creating service provider
