@@ -11,7 +11,7 @@ import RatingStars from '../Components/common/RatingStars';
 import GetAvgRating from '../utils/avgRating';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { BsCrosshair, BsGlobe, BsMicrosoftTeams } from 'react-icons/bs';
-import { FaShareSquare } from 'react-icons/fa';
+import { FaPlay, FaShareSquare } from 'react-icons/fa';
 import {IoCloseOutline, IoVideocamOutline} from 'react-icons/io5';
 import { addToCart } from '../slices/cartSlice';
 import { ACCOUNT_TYPE } from '../utils/constants';
@@ -298,7 +298,12 @@ const CourseDetails = () => {
                                                     <IoVideocamOutline className='txt-lg text-richblack-5' />
                                                     <span className='text-lg'>{subItem?.title}</span>
                                                 </div>
-                                                <span className='text-sm text-richblack-200'>
+                                                <span className='text-sm text-richblack-200 flex flex-row gap-2 justify-center'>
+                                                    {index === 0 && subIndex === 0 && courseDetail?.firstVideoUrl &&
+                                                        <div className="flex items-center justify-center w-full h-full p-1 bg-gray-200 rounded-full shadow-md hover:bg-green-500 hover:scale-110 transition-all duration-300 cursor-pointer">
+                                                            <FaPlay className="text-gray-700 hover:text-white scale-[0.75]" />
+                                                        </div>
+                                                    }
                                                     {subItem?.timeDuration 
                                                     ? 
                                                         Math.floor(subItem.timeDuration / (60*60)) > 0
