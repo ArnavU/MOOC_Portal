@@ -445,17 +445,17 @@ exports.getFullCourseDetails = async (req, res) => {
 		const { courseId } = req.body;
 		const userId = req.user.id;
 
-		const course = await Course.findById(courseId).populate("department");
-		const departmentHod = course.department.hod;
-		const instructor = course.instructor;
+		// const course = await Course.findById(courseId).populate("department");
+		// const departmentHod = course.department.hod;
+		// const instructor = course.instructor;
 
-		if(userId !== instructor && userId !== departmentHod) {
-			console.log("User is not authorized to view this course");
-			return res.status(403).json({
-				success: false,
-				message: "You are not authorized to view this course"
-			});
-		}		
+		// if(userId !== instructor && userId !== departmentHod) {
+		// 	console.log("User is not authorized to view this course");
+		// 	return res.status(403).json({
+		// 		success: false,
+		// 		message: "You are not authorized to view this course"
+		// 	});
+		// }		
 
 		// Find course with populated fields
 		const courseDetails = await Course.findOne({
