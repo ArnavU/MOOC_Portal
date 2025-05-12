@@ -1,17 +1,46 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { removeFromCart } from '../../../../slices/cartSlice';
 import ReactStars from "react-rating-stars-component";
 import { Link } from 'react-router-dom';
 
+// Helper function to calculate average rating
+const GetAvgRating = (ratingAndReviews) => {
+    if (!ratingAndReviews || !ratingAndReviews.length) return 0;
+    
+    const totalRating = ratingAndReviews.reduce((acc, review) => {
+        return acc + (review.rating || 0);
+    }, 0);
+    
+    const avgRating = totalRating / ratingAndReviews.length;
+    return avgRating.toFixed(1);
+};
+
 const RenderCartCourses = () => {
     const { cart } = useSelector((state) => state.cart);
     const dispatch = useDispatch();
+    const [courseRatings, setCourseRatings] = useState({});
 
-    // Debug logging
+    // Calculate average ratings for all courses in cart
     useEffect(() => {
         console.log("Cart items in RenderCartCourses:", cart);
+        
+        if (cart && Array.isArray(cart)) {
+            const ratingMap = {};
+            
+            cart.forEach(course => {
+                if (course?.ratingAndReviews?.length > 0) {
+                    const avgRating = GetAvgRating(course.ratingAndReviews);
+                    ratingMap[course._id] = avgRating;
+                    console.log(`Average rating for ${course.courseName}:`, avgRating);
+                } else {
+                    ratingMap[course._id] = 0;
+                }
+            });
+            
+            setCourseRatings(ratingMap);
+        }
     }, [cart]);
 
     // Handle empty or undefined cart
@@ -61,7 +90,7 @@ const RenderCartCourses = () => {
                                 </span>
                                 <ReactStars
                                     count={5}
-                                    value={course?.averageRating || 0}
+                                    value={parseFloat(courseRatings[course?._id] || 0)}
                                     size={20}
                                     edit={false}
                                     activeColor="#ffd700"
@@ -71,7 +100,7 @@ const RenderCartCourses = () => {
                             {/* Instructor */}
                             {course?.instructor && (
                                 <p className="text-sm text-richblack-300">
-                                    Instructor: {course.instructor?.name || "Unknown"}
+                                    Instructor: {(course.instructor?.firstName || "Unknown") + " " + (course.instructor?.lastName || "")}
                                 </p>
                             )}
                             
