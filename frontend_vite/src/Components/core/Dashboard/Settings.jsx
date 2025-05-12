@@ -188,7 +188,7 @@ const Settings = () => {
                 <div className="flex flex-col gap-2 lg:w-[48%]">
                     <label htmlFor="designation" className="text-richblack-50">Designation</label>
                     <input 
-                      defaultValue={user?.additionalDetails.designation || "Not Set"} 
+                      defaultValue={user?.additionalDetails?.designation || "Not Set"} 
                       type="text" 
                       name="designation" 
                       id="designation" 

@@ -135,3 +135,12 @@ export const HOD_API = {
     // Department Management Endpoints
     GET_DEPARTMENT_STUDENTS: BASE_URL + "/hod/students"
 };
+
+export const QUIZ_API = {
+  CREATE_QUIZ: BASE_URL + "/quiz/create",
+  DELETE_QUIZ: BASE_URL + "/quiz/delete",
+  GET_QUIZ_DETAILS: BASE_URL + "/quiz/details",
+  GET_SUBSECTION_IDS_WITH_QUIZZES: BASE_URL + "/quiz/subsectionIds",
+  SUBMIT_QUIZ_API: BASE_URL + "/quiz/submit",
+  GET_SUBMITTED_QUIZZES_API: BASE_URL + "/quiz/submittedQuizes",
+};

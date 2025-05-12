@@ -15,6 +15,7 @@ const database = require("./config/database");
 const cookieParser = require("cookie-parser");
 const studentRoutes = require("./routes/Student");
 const {createServiceProvider} = require('./controllers/developer')
+const quizRoutes = require('./routes/Quiz')
 
 const cors = require("cors");
 const fileUpload = require("express-fileupload");
@@ -67,6 +68,8 @@ app.use("/api/v1/hod", hodRoutes);
 app.use("/api/v1/instructor", instructorRoutes);
 
 app.use("/api/v1/student", studentRoutes);
+
+app.use("/api/v1/quiz", quizRoutes);
 
 
 // creating service provider
