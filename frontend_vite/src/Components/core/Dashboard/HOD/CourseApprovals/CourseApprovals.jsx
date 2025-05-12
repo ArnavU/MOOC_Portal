@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { fetchPendingCourses, approveCourse } from "../../../../../services/operations/courseDetailsAPI";
+import { fetchPendingCourses, approveCourse, getFirstSectionSubSectionIds } from "../../../../../services/operations/courseDetailsAPI";
 import { FiCheck, FiEye, FiClock, FiUsers, FiBook, FiTag, FiX, FiImage } from "react-icons/fi";
+import { FaBookOpen } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 const CourseApprovals = () => {
   const [pendingCourses, setPendingCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPendingCoursesData();
@@ -37,6 +40,13 @@ const CourseApprovals = () => {
   const handleViewDetails = (course) => {
     setSelectedCourse(course);
   };
+
+  const handleViewCourse = async(courseId) => {
+    const [section, subSection] = await getFirstSectionSubSectionIds(courseId);
+    if(section && subSection) {
+      navigate(`/dashboard/enrolled-courses/view-course/${courseId}/section/${section}/sub-section/${subSection}`);
+    }
+  }
 
   if (loading) {
     return (
@@ -90,13 +100,21 @@ const CourseApprovals = () => {
                     >
                       <FiEye className="text-richblack-5" />
                     </button>
-                    <button
-                      onClick={() => handleApprove(course._id)}
-                      className="p-2.5 rounded-full bg-green-600 hover:bg-green-500 transition-all duration-200"
-                      title="Approve Course"
-                    >
-                      <FiCheck className="text-richblack-5" />
-                    </button>
+                    <div className="flex flex-row gap-2">
+                      <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                        onClick={() => handleViewCourse(course._id)}
+                      >
+                        <FaBookOpen className="text-xl" />
+                        View Course
+                      </button>
+                      <button
+                        onClick={() => handleApprove(course._id)}
+                        className="p-2.5 rounded-full bg-green-600 hover:bg-green-500 transition-all duration-200"
+                        title="Approve Course"
+                      >
+                        <FiCheck className="text-richblack-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
                 
@@ -111,7 +129,7 @@ const CourseApprovals = () => {
                   </div>
                   <div className="flex items-center text-richblack-200 text-base">
                     <FiClock className="mr-3 text-blue-200" />
-                    <span>Duration: {course.duration} weeks</span>
+                    <span>Duration: {course.duration}</span>
                   </div>
                   <div className="flex items-center text-richblack-200 text-base">
                     <FiUsers className="mr-3 text-pink-200" />
@@ -198,7 +216,7 @@ const CourseApprovals = () => {
 
                   <div>
                     <h3 className="text-xl font-medium text-richblack-5 mb-3">Duration</h3>
-                    <p className="text-richblack-200 text-base">{selectedCourse.duration} weeks</p>
+                    <p className="text-richblack-200 text-base">{selectedCourse.duration}</p>
                   </div>
 
                   <div>

@@ -158,7 +158,7 @@ exports.getAllCourses = async (req, res) => {
 	}
 };
 
-//getCourseDetails
+//getCourseDetails - can be accessed by anyone
 exports.getCourseDetails = async (req,res)=>{
 	try {
 		const userId = req?.user?.id; // coming from middleware - addUserToRequest
@@ -445,6 +445,18 @@ exports.getFullCourseDetails = async (req, res) => {
 		const { courseId } = req.body;
 		const userId = req.user.id;
 
+		const course = await Course.findById(courseId).populate("department");
+		const departmentHod = course.department.hod;
+		const instructor = course.instructor;
+
+		if(userId !== instructor && userId !== departmentHod) {
+			console.log("User is not authorized to view this course");
+			return res.status(403).json({
+				success: false,
+				message: "You are not authorized to view this course"
+			});
+		}		
+
 		// Find course with populated fields
 		const courseDetails = await Course.findOne({
 			_id: courseId,
@@ -496,7 +508,7 @@ exports.getFullCourseDetails = async (req, res) => {
 		}).populate("completedLectures");
 
 		// Prepare completed videos array
-		let completedVideos = ["none"];
+		let completedVideos = [];
 		if (courseProgress?.completedVideos?.length > 0) {
 			completedVideos = courseProgress.completedVideos;
 		} else if (courseAssignment?.completedLectures?.completedVideos?.length > 0) {
@@ -706,7 +718,63 @@ exports.getPendingCourses = async (req, res) => {
 		})
 		.populate('instructor', 'firstName lastName email')
 		.populate('category')
-		.populate('department');
+		.populate('department').lean();
+
+
+		// *****************************
+		const allCourses = await Course.find({
+			department: hod.department,
+			status: "Published",
+			approved: false
+		})
+		.populate({
+			path: "category",
+			select: "name"
+		})
+		.populate({
+			path: "courseContent",
+			populate: {
+				path: "subSection"
+			}
+		});
+
+		// Calculate total duration for each course
+		allCourses.forEach(course => {
+			let totalDurationInSeconds = 0;
+			
+			// Calculate total duration from all subsections
+			course.courseContent?.forEach(section => {
+				section.subSection?.forEach(subSection => {
+					if (subSection.timeDuration) {
+						totalDurationInSeconds += parseInt(subSection.timeDuration);
+					}
+				});
+			});
+
+			// Convert seconds to hours and minutes
+			const hours = Math.floor(totalDurationInSeconds / 3600);
+			const minutes = Math.floor((totalDurationInSeconds % 3600) / 60);
+			const seconds = totalDurationInSeconds % 60;
+			
+			// Format duration string
+			let duration = "";
+			if (hours > 0) {
+				duration += `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+			}
+			if (minutes > 0) {
+				if (duration) duration += " ";
+				duration += `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+			}
+			if (seconds > 0) {
+				if (duration) duration += " ";
+				duration += `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
+			}
+			if (!duration) duration = "0 seconds";
+
+			pendingCourses.find(pendingCourse => pendingCourse._id.toString() === course._id.toString()).duration = duration;
+		});
+
+		// ******************************
 
 		return res.status(200).json({
 			success: true,
@@ -866,3 +934,48 @@ exports.getApprovedInstructorCourses = async (req, res) => {
 		});
 	}
 };
+
+// for instructor and hod to get first course's section and subsection ids
+exports.getCourseFirstSectionAndSubSectionIds = async (req, res) => {
+	try {
+		const {courseId} = req.params;
+		if(!courseId) {
+			console.log("Course id is required for getting section and subsection ids")
+			return res.status(400).json({
+				success: false,
+				message: "Course ID is required"
+			});
+		}
+
+		const course = await Course.findById(courseId)
+			.populate({
+				path: "courseContent", 
+				populate: {
+					path: "subSection",
+				}
+			})
+
+		if(!course) {
+			console.log("Course not found");
+			return res.status(404).json({
+				success: false,
+				message: "Course not found"
+			});
+		}
+
+		const firstSection = course.courseContent[0]?._id;
+		const firstSubSection = course.courseContent[0]?.subSection[0]?._id;
+		const data = [firstSection, firstSubSection];
+		return res.status(200).json({
+			success: true, 
+			data: data,
+		})
+
+	} catch(error) {
+		console.log("Internal server error at first section and subsection of course: ", error)
+		return res.status(500).json({
+			success: false,
+			messsage: "Failed to give course's details"
+		})
+	}
+}

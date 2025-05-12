@@ -19,6 +19,7 @@ const VideoDetailsSidebar = ({setReviewModal}) => {
   // console.log("sectionId", sectionId, "SubSectionId", subsectionId);
   const {courseSectionData, courseEntireData, completedLectures, totalNoOfLectures} = useSelector(state => state.viewCourse);
   const {selectedQuizSubSectionId, subSectionIdsWithQuizzes, submittedQuizzesDetails} = useSelector(state => state.quizDetails);
+  const {accountType} = useSelector(state => state.profile.user);
   // console.log(courseSectionData);
   const navigate = useNavigate();
   const[showSidebar, setShowSidebar] = useState(false);
@@ -85,11 +86,21 @@ const VideoDetailsSidebar = ({setReviewModal}) => {
         <div className={`${showSidebar?"hidden":""} transition-all origin-right duration-500 flex h-[calc(100vh-3.5rem)] w-[320px] max-w-[350px] flex-col border-r-[1px] border-r-richblack-700 bg-richblack-800 offSidebar2`}>
           <div className={`${showSidebar?"hidden":""} mx-5   flex flex-col items-start justify-between gap-2 gap-y-4 border-b border-richblack-600 py-5 text-lg font-bold text-richblack-25 offSidebar2`}>
             <div className='flex w-full items-center justify-between '>
-              <div className='flex h-[35px] w-[35px] items-center justify-center rounded-full bg-richblack-100 p-1 text-richblack-700 hover:scale-90'>
+              <div className='relative flex h-[35px] w-[35px] items-center justify-center rounded-full bg-richblack-100 p-1 text-richblack-700 hover:scale-90'>
                 <FaChevronLeft className=' cursor-pointer md:hidden' onClick={()=>{setShowSidebar(true)}}/>
-                <FaChevronLeft className=' cursor-pointer hidden md:block' onClick={()=>{
-                  navigate(`/dashboard/enrolled-courses`);
-                }}/>
+                <div className='absolute rounded-full h-full w-full flex items-center justify-center cursor-pointer'
+                  onClick={()=>{
+                      if(accountType === "Student"){
+                        navigate(`/dashboard/enrolled-courses`);
+                      } else if(accountType === "Instructor"){
+                        navigate(`/dashboard/my-courses`);
+                      } else if(accountType === "hod") {
+                        navigate(`/dashboard/hod/course-approvals`);
+                      }
+                  }}
+                >
+                  <FaChevronLeft className='hidden md:block' />
+                </div>
               </div>
               <IconBtn text={"Review"} onclick={()=>{setReviewModal(true)}}/>
             </div>

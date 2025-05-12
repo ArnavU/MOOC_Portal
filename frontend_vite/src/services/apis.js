@@ -55,6 +55,7 @@ export const courseEndpoints = {
   GET_APPROVED_INSTRUCTOR_COURSES: BASE_URL + "/course/approvedInstructorCourses",
   UPLOAD_ATTACHMENT_API: BASE_URL + "/course/uploadAttachment",
   DELETE_ATTACHMENT_API: BASE_URL + "/course/deleteAttachment",
+  GET_FIRST_SECTION_SUBSECTION_IDS_API: BASE_URL + "/course/firstSectionSubSectionIds",
 };
 
 // INSTRUCTOR ENDPOINTS
