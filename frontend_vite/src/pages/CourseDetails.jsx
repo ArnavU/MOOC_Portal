@@ -194,7 +194,9 @@ const CourseDetails = () => {
                                 {ACCOUNT_TYPE.INSTRUCTOR !==user?.accountType &&
                                 <>
                                     {renderEnrollmentButton()}
-                                    <button onClick={handleAddToWishlist} className='blackButton text-richblack-5'>Add to Wishlist</button>
+                                    {courseDetail?.enrollmentStatus === "not-assigned" && (
+                                        <button onClick={handleAddToWishlist} className='blackButton text-richblack-5'>Add to Wishlist</button>
+                                    )}
                                 </>
                                 }
                             </div>
