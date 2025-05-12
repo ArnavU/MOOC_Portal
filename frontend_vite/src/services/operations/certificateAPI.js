@@ -9,7 +9,7 @@ export const downloadCertificate = async (courseId) => {
     const toastId = toast.loading("Generating certificate...");
     try {
         const response = await axios.get(
-        `http://localhost:5000/api/v1/certificate/generate/${courseId}`, // Replace with your backend endpoint
+        `${CERTIFICATE_API.GET_CERTIFICATE_API}/${courseId}`, // Replace with your backend endpoint
         {
           withCredentials: true, // Include credentials (cookies) in the request
           responseType: "blob", // Important for handling binary data
@@ -48,7 +48,7 @@ export const getCertificate = async (courseId) => {
   const toastId = toast.loading("Generating certificate...");
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/v1/certificate/generate/${courseId}`,
+      `${CERTIFICATE_API.GET_CERTIFICATE_API}/${courseId}`,
       {
         withCredentials: true,
         responseType: "blob",
