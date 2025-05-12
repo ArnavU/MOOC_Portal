@@ -16,7 +16,7 @@ const printer = new PdfPrinter(fonts);
 
 exports.generateCertificate = async (req, res) => {
     console.log("Generating certificate...");
-    console.log("User ID from request:", req.user.id);
+    console.log("User ID from request:", req.user.id); 
     const userId = req.user.id;
 	try {
         
