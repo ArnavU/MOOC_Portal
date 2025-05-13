@@ -721,7 +721,7 @@ exports.getPendingCourses = async (req, res) => {
 		.populate('department').lean();
 
 
-		// *****************************
+		// ***************************** attaching duration to each course *****************
 		const allCourses = await Course.find({
 			department: hod.department,
 			status: "Published",
@@ -872,15 +872,67 @@ exports.getAllDepartmentCourses = async (req, res) => {
 			})
 			.sort({ createdAt: -1 }).lean();
 
-			const promises = courses.map(async (course, index) => {
-				const total_allocations = await CourseAssignment.countDocuments({course: course._id});
-				const total_enrollment = await CourseAssignment.countDocuments({course: course._id, isEnrolled: true});
+		const promises = courses.map(async (course, index) => {
+			const total_allocations = await CourseAssignment.countDocuments({course: course._id});
+			const total_enrollment = await CourseAssignment.countDocuments({course: course._id, isEnrolled: true});
 
-				course.total_allocation = total_allocations;
-				course.total_enrollment = total_enrollment;
-			})
+			course.total_allocation = total_allocations;
+			course.total_enrollment = total_enrollment;
+		})
 
-			await Promise.all(promises);
+		await Promise.all(promises);
+
+		// ***************************** attaching duration to each course *****************
+		const allCourses = await Course.find({ department: hod.department })
+		.populate({
+			path: "category",
+			select: "name"
+		})
+		.populate({
+			path: "courseContent",
+			populate: {
+				path: "subSection"
+			}
+		});
+
+		// Calculate total duration for each course
+		allCourses.forEach(course => {
+			let totalDurationInSeconds = 0;
+			
+			// Calculate total duration from all subsections
+			course.courseContent?.forEach(section => {
+				section.subSection?.forEach(subSection => {
+					if (subSection.timeDuration) {
+						totalDurationInSeconds += parseInt(subSection.timeDuration);
+					}
+				});
+			});
+
+			// Convert seconds to hours and minutes
+			const hours = Math.floor(totalDurationInSeconds / 3600);
+			const minutes = Math.floor((totalDurationInSeconds % 3600) / 60);
+			const seconds = totalDurationInSeconds % 60;
+			
+			// Format duration string
+			let duration = "";
+			if (hours > 0) {
+				duration += `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+			}
+			if (minutes > 0) {
+				if (duration) duration += " ";
+				duration += `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
+			}
+			if (seconds > 0) {
+				if (duration) duration += " ";
+				duration += `${seconds} ${seconds === 1 ? 'second' : 'seconds'}`;
+			}
+			if (!duration) duration = "0 seconds";
+
+			courses.find(pendingCourse => pendingCourse._id.toString() === course._id.toString()).duration = duration;
+		});
+
+		// ******************************
+			
 			
 
 		if (!courses || courses.length === 0) {
