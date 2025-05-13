@@ -32,6 +32,7 @@ const {
   GET_APPROVED_INSTRUCTOR_COURSES,
   UPLOAD_ATTACHMENT_API,
   DELETE_ATTACHMENT_API,
+  GET_FIRST_SECTION_SUBSECTION_IDS_API,
 } = courseEndpoints;
 
 export const getAllCourses = async () => {
@@ -577,3 +578,17 @@ export const deleteAttachment = async (sectionId, courseId, url) => {
   toast.dismiss(toastId);
   return result;
 };
+
+export const getFirstSectionSubSectionIds = async (courseId) => {
+  let result = null;
+  try {
+    const response = await apiConnector("GET", `${GET_FIRST_SECTION_SUBSECTION_IDS_API}/${courseId}`);
+    if (!response?.data?.success) {
+      throw new Error(response?.data?.message || "Could not fetch section and subsection IDs");
+    }
+    result = response?.data?.data;
+  } catch (error) {
+    console.log("GET_FIRST_SECTION_SUBSECTION_IDS_API ERROR............", error);
+  }
+  return result;
+}

@@ -4,7 +4,7 @@ import { Table, Tbody, Td, Th, Thead, Tr } from "react-super-responsive-table"
 import { setCourse, setEditCourse } from "../../../../slices/courseSlice"
 import "react-super-responsive-table/dist/SuperResponsiveTableStyle.css"
 import { useState } from "react"
-import { FaCheck } from "react-icons/fa"
+import { FaCheck, FaEye } from "react-icons/fa"
 import { FiEdit2 } from "react-icons/fi"
 import { HiClock } from "react-icons/hi"
 import { RiDeleteBin6Line } from "react-icons/ri"
@@ -14,6 +14,7 @@ import { formatDate } from "../../../../services/formatDate"
 import {
   deleteCourse,
   fetchInstructorCourses,
+  getFirstSectionSubSectionIds,
 } from "../../../../services/operations/courseDetailsAPI"
 import { COURSE_STATUS } from "../../../../utils/constants"
 import ConfirmationModal from "../../../common/ConfirmationModal"
@@ -35,6 +36,13 @@ export default function CoursesTable({ courses, setCourses }) {
     }
     setConfirmationModal(null)
     setLoading(false)
+  }
+
+  const handleViewCourse = async(courseId) => {
+    const [section, subSection] = await getFirstSectionSubSectionIds(courseId);
+    if(section && subSection) {
+      navigate(`/dashboard/enrolled-courses/view-course/${courseId}/section/${section}/sub-section/${subSection}`);
+    }
   }
 
   // console.log("All Course ", courses)
@@ -139,6 +147,13 @@ export default function CoursesTable({ courses, setCourses }) {
                         )}
                       </div>
                     </div>
+                    <button
+                      onClick={() => {handleViewCourse(course._id)}}
+                      className="w-fit flex flex-row items-center gap-2 rounded-md bg-yellow-50 px-3 py-1 text-sm font-medium text-richblack-900 transition-all duration-200 hover:bg-yellow-100"
+                    >
+                      <div><FaEye size={14} /></div>
+                      <span>View Course</span>
+                    </button>
                   </div>
                 </Td>
                 <Td className="text-sm font-medium text-richblack-100">

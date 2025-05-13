@@ -19,6 +19,7 @@ const {
   approveCourse,
   getAllDepartmentCourses,
   getApprovedInstructorCourses,
+  getCourseFirstSectionAndSubSectionIds,
 } = require("../controllers/Course")
 
 
@@ -105,6 +106,8 @@ router.post("/approveCourse", auth, isHOD, approveCourse);
 router.get("/getDepartmentCourses", auth, isHOD, getAllDepartmentCourses);
 // Get all approved courses created by the instructor themselves
 router.get("/approvedInstructorCourses", auth, isInstructor, getApprovedInstructorCourses);
+// Get first section id and subsection id
+router.get("/firstSectionSubSectionIds/:courseId", auth, getCourseFirstSectionAndSubSectionIds);
 
 
 // ********************************************************************************************************

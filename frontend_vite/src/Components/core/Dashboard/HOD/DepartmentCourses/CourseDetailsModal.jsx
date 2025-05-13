@@ -82,7 +82,7 @@ const CourseDetailsModal = ({ course, onClose }) => {
 
                 <div>
                   <h3 className="text-xl font-medium text-richblack-5 mb-3">Duration</h3>
-                  <p className="text-richblack-200 text-base">{course.duration} weeks</p>
+                  <p className="text-richblack-200 text-base">{course.duration}</p>
                 </div>
 
                 <div>

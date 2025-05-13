@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { fetchDepartmentCourses } from "../../../../../services/operations/courseDetailsAPI";
+import { fetchDepartmentCourses, getFirstSectionSubSectionIds } from "../../../../../services/operations/courseDetailsAPI";
 import { FiBook, FiUsers, FiClock, FiTag, FiEye, FiImage, FiUpload, FiEdit2, FiCheck, FiAlertCircle } from "react-icons/fi";
 import CourseDetailsModal from "./CourseDetailsModal";
+import { useNavigate } from "react-router";
+import { FaBookOpen } from "react-icons/fa";
 
 const DepartmentCourses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCoursesData();
@@ -28,6 +31,13 @@ const DepartmentCourses = () => {
   const handleViewDetails = (course) => {
     setSelectedCourse(course);
   };
+
+  const handleViewCourse = async(courseId) => {
+    const [section, subSection] = await getFirstSectionSubSectionIds(courseId);
+    if(section && subSection) {
+      navigate(`/dashboard/enrolled-courses/view-course/${courseId}/section/${section}/sub-section/${subSection}`);
+    }
+  }
 
   if (loading) {
     return (
@@ -84,23 +94,31 @@ const DepartmentCourses = () => {
                     <h2 className="text-2xl font-semibold text-richblack-5 bg-gradient-to-r from-richblack-100 to-richblack-200 bg-clip-text text-transparent">
                       {course.courseName}
                     </h2>
-                    <div className="flex gap-2">
-                      <span className={`px-2 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
-                        course.status === 'Published' 
-                          ? 'bg-yellow-500/20 text-yellow-200' 
-                          : 'bg-red-500/20 text-red-200'
-                      }`}>
-                        {course.status === 'Published' ? <FiUpload className="text-sm" /> : <FiEdit2 className="text-sm" />}
-                        {course.status}
-                      </span>
-                      <span className={`px-2 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
-                        course.approved 
-                          ? 'bg-green-500/20 text-green-200' 
-                          : 'bg-red-500/20 text-red-200'
-                      }`}>
-                        {course.approved ? <FiCheck className="text-sm" /> : <FiAlertCircle className="text-sm" />}
-                        {course.approved ? 'Approved' : 'Not Approved'}
-                      </span>
+                    <div className="flex flex-col items-end relative">
+                      <div className="flex gap-2">
+                        <span className={`px-2 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
+                          course.status === 'Published' 
+                            ? 'bg-yellow-500/20 text-yellow-200' 
+                            : 'bg-red-500/20 text-red-200'
+                        }`}>
+                          {course.status === 'Published' ? <FiUpload className="text-sm" /> : <FiEdit2 className="text-sm" />}
+                          {course.status}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
+                          course.approved 
+                            ? 'bg-green-500/20 text-green-200' 
+                            : 'bg-red-500/20 text-red-200'
+                        }`}>
+                          {course.approved ? <FiCheck className="text-sm" /> : <FiAlertCircle className="text-sm" />}
+                          {course.approved ? 'Approved' : 'Not Approved'}
+                        </span>
+                      </div>
+                      <button className="flex absolute top-full mt-4 items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+                        onClick={() => handleViewCourse(course._id)}
+                      >
+                        <FaBookOpen className="text-xl" />
+                        View Course
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center text-richblack-300">
@@ -119,7 +137,7 @@ const DepartmentCourses = () => {
                   </div>
                   <div className="flex items-center text-richblack-200 text-base">
                     <FiClock className="mr-3 text-blue-200" />
-                    <span>Duration: {course.duration} weeks</span>
+                    <span>Duration: {course.duration}</span>
                   </div>
                   <div className="flex items-center text-richblack-200 text-base">
                     <FiUsers className="mr-3 text-pink-200" />
