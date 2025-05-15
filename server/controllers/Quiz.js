@@ -144,6 +144,15 @@ exports.getSubsectionIdsWithQuizzes = async (req, res) => {
 exports.submitQuiz = async (req, res) => {
     try {
         const { subSectionId, answers } = req.body;
+        // Handle stringified answers (e.g., from Word/JSON-formatted input)
+        if (typeof answers === 'string') {
+            try {
+                answers = JSON.parse(answers);
+            } catch (err) {
+                return res.status(400).json({ success: false, message: "Invalid JSON in answers." });
+            }
+        }
+
         const userId = req.user.id;
         if (!userId || !subSectionId || Object.keys(answers).length === 0) {
             return res.status(400).json({ message: 'userId, subSection, and an array of answers are required.' });
@@ -222,8 +231,8 @@ exports.getSubmittedQuizzes = async (req, res) => {
 
             questions.forEach(q => {
                 if (
-                    answerMapping[q._id.toString()] &&
-                    answerMapping[q._id.toString()] === q.correctAnswer
+                    answerMapping[q._id.toString()]?.toString().trim() ===
+                    q.correctAnswer.toString().trim()
                 ) {
                     scoredPoints++;
                 }
